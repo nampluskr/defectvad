@@ -14,8 +14,6 @@ path:
   visa: /mnt/d/deep_learning/datasets/visa
   btad: /mnt/d/deep_learning/datasets/btad
 
-  project: /mnt/d/github/defectvad
-  output: /mnt/d/github/defectvad/outputs
 
 #####################################################################
 # Dataset
@@ -54,3 +52,13 @@ test_loader:
     drop_last: false
     num_workers: 8
     pin_memory: true
+
+
+#####################################################################
+# Experiment
+#####################################################################
+
+output:
+  path: null      # to be updated
+  weights: null   # to be updated
+  params: null    # to be updated
