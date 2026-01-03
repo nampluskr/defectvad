@@ -1,0 +1,22 @@
+# .gitignore
+
+# Personal configuration
+configs/paths.yaml
+configs/paths.local.yaml
+.env
+.env.local
+
+# Cache
+*.pyc
+__pycache__/
+.pytest_cache/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Data
+outputs/
+checkpoints/

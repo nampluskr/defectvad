@@ -1,0 +1,56 @@
+# configs/base.yaml
+
+seed: 42
+
+#####################################################################
+# Path
+#####################################################################
+
+path:
+  backbone: /mnt/d/deep_learning/backbones
+
+  dataset: /mnt/d/deep_learning/datasets
+  mvtec: /mnt/d/deep_learning/datasets/mvtec
+  visa: /mnt/d/deep_learning/datasets/visa
+  btad: /mnt/d/deep_learning/datasets/btad
+
+  project: /mnt/d/github/defectvad
+  output: /mnt/d/github/defectvad/outputs
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  name: mvtec
+  module: defectvad.data.datasets
+  class: MVTecDataset
+
+  path: null      # to be updated after
+  category: null  # to be updated
+
+  img_size: 256
+  crop_size: null
+  normalize: true
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+
+#####################################################################
+# Dataloader
+#####################################################################
+
+train_loader:
+  batch_size: 16
+  shuffle: true
+  drop_last: true
+  num_workers: 8
+  pin_memory: true
+
+
+test_loader:
+    batch_size: 1
+    shuffle: false
+    drop_last: false
+    num_workers: 8
+    pin_memory: true
