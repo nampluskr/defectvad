@@ -37,10 +37,16 @@ def create_dataloader(dataset, config):
 def create_model(config):
     module = importlib.import_module(config["module"])
     module_class = getattr(module, config["class"])
-    return module_class(**config["params"])
+    if config["params"] is not None:
+        return module_class(**config["params"])
+    else:
+        return module_class()
 
 
 def create_trainer(model, config):
     module = importlib.import_module(config["module"])
     module_class = getattr(module, config["class"])
-    return module_class(model, **config["params"])
+    if config["params"] is not None:
+        return module_class(model, **config["params"])
+    else:
+        return module_class(model)

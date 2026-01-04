@@ -50,7 +50,9 @@ class Evaluator:
 
         results = self.metrics.compute()
         return {
-            **{k: v.item() for k, v in results.items()},
+            # **{k: v.item() for k, v in results.items()},
+            "auroc": results["auroc"].item(),
+            "aupr": results["aupr"].item(),
             "f1": f1_score.item(),
             "th": f1_threshold.item(),
         }
@@ -84,7 +86,9 @@ class Evaluator:
 
         results = self.metrics.compute()
         return {
-            **{k: v.item() for k, v in results.items()},
+            # **{k: v.item() for k, v in results.items()},
+            "auroc": results["auroc"].item(),
+            "aupr": results["aupr"].item(),
             "f1": f1_score.item(),
             "th": f1_threshold.item(),
         }

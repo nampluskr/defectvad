@@ -4,18 +4,7 @@
 # Hyperparameters
 #####################################################################
 
-dataset: mvtec
-category: bottle
-model: stfpm
-
 seed: 42
-batch_size: 16
-normalize: true
-max_epochs: 10
-
-output_dir: null
-wegihts: null
-config: null
 
 #####################################################################
 # Paths
@@ -23,7 +12,6 @@ config: null
 
 path:
   backbone: /mnt/d/deep_learning/backbones
-
   dataset: /mnt/d/deep_learning/datasets
   mvtec: /mnt/d/deep_learning/datasets/mvtec
   visa: /mnt/d/deep_learning/datasets/visa
@@ -37,10 +25,8 @@ dataset:
   name: mvtec
   module: defectvad.data.datasets
   class: MVTecDataset
-
   path: null        # to be updated
   category: null    # to be updated
-
   img_size: 256
   crop_size: null
   normalize: true
@@ -70,19 +56,3 @@ test_loader:
   drop_last: false
   num_workers: 8
   pin_memory: true
-
-#####################################################################
-# Experiment outputs
-#####################################################################
-
-output:
-  name: null        # to be updated
-  dataset: null     # to be updated
-  category: null    # to be updated
-  model: null       # to be updated
-  max_epochs: null  # to be updated
-
-  path: null        # to be updated
-  weights: null     # to be updated
-  config: null      # to be updated
-  params: null      # to be updated

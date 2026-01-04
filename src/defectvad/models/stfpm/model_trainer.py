@@ -20,14 +20,12 @@ class STFPM(BaseModel):
 
 
 class STFPMTrainer(BaseTrainer):
-    def __init__(self, model, max_epochs=10):
+    def __init__(self, model):
         if not isinstance(model, STFPM):
             raise TypeError(f"Unexpected  model: {type(model).__name__}")
 
         loss_fn = STFPMLoss()
         super().__init__(model, loss_fn=loss_fn)
-
-        self.max_epochs = max_epochs
 
     def configure_optimizers(self):
         self.optimizer = optim.SGD(

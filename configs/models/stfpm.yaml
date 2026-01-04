@@ -8,7 +8,6 @@ model:
   name: stfpm
   module: defectvad.models.stfpm.model_trainer
   class: STFPM
-
   params:
     backbone: resnet50              # resnet18 | resnet50
     layers:
@@ -24,8 +23,6 @@ trainer:
   name: stfpm
   module: defectvad.models.stfpm.model_trainer
   class: STFPMTrainer
-
-  params: 
-    max_epochs: 20
-
+  max_epochs: 20
   validate: true
+  params: null

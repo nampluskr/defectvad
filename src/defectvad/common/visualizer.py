@@ -1,5 +1,6 @@
 # common/predictor.py
 
+import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -44,17 +45,9 @@ class Visualizer:
         else:
             self.pred_masks = None
 
-    def _get_mask(self, idx):
-        return self.masks[idx] if self.masks is not None else None
-
-    def _get_pred_label(self, idx):
-        return self.pred_labels[idx] if self.pred_labels is not None else None
-
-    def _get_pred_mask(self, idx):
-        return self.pred_masks[idx] if self.pred_masks is not None else None
-
     def visualize(self, image, anomaly_map=None, label=None, pred_label=None,
-                mask=None, pred_mask=None, denormalize=True, cmap="jet", overlay=False):
+                mask=None, pred_mask=None, denormalize=True, cmap="jet", overlay=False,
+                save_path=None):
 
         image = to_numpy_rgb(image, denormalize=denormalize)
         anomaly_map = to_numpy_gray(anomaly_map) if anomaly_map is not None else None
@@ -114,46 +107,77 @@ class Visualizer:
             ax.axis("off")
 
         fig.tight_layout()
-        plt.show()
 
+        if save_path is not None:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        else:
+            plt.show()
 
-    def show_normal(self, max_samples=2, denormalize=True):
+        plt.close(fig)
+
+    def _iterate_and_visualize(self, target_label, max_samples=-1, denormalize=True, save_dir=None):
         cnt = 0
         for i in range(self.images.shape[0]):
-            if self.labels is not None and self.labels[i] == 0:
-                cnt += 1
-                self.visualize(
-                    self.images[i],
-                    self.anomaly_maps[i],
-                    label=self.labels[i],
-                    pred_label=self._get_pred_label(i),
-                    mask=self._get_mask(i),
-                    pred_mask=self._get_pred_mask(i),
-                    denormalize=denormalize,
-                    cmap="jet",
-                    overlay=True
-                )
-            if cnt == max_samples:
+            if self.labels is None or int(self.labels[i]) != target_label:
+                continue
+
+            save_path = None
+            if save_dir is not None:
+                prefix = "normal" if target_label == 0 else "anomaly"
+                save_path = os.path.join(save_dir, f"{prefix}_{cnt:03d}.png")
+
+            self.visualize(
+                self.images[i],
+                anomaly_map=self.anomaly_maps[i] if self.anomaly_maps is not None else None,
+                label=self.labels[i] if self.labels is not None else None,
+                pred_label=self.pred_labels[i] if self.pred_labels is not None else None,
+                mask=self.masks[i] if self.masks is not None else None,
+                pred_mask=self.pred_masks[i] if self.pred_masks is not None else None,
+                denormalize=denormalize,
+                cmap="jet",
+                overlay=True,
+                save_path=save_path,
+            )
+
+            cnt += 1
+            if max_samples > 0 and cnt >= max_samples:
                 break
 
-    def show_anomaly(self, max_samples=2, denormalize=True):
-        cnt = 0
-        for i in range(self.images.shape[0]):
-            if self.labels is not None and self.labels[i] == 1:
-                cnt += 1
-                self.visualize(
-                    self.images[i],
-                    self.anomaly_maps[i],
-                    label=self.labels[i],
-                    pred_label=self._get_pred_label(i),
-                    mask=self._get_mask(i),
-                    pred_mask=self._get_pred_mask(i),
-                    denormalize=denormalize,
-                    cmap="jet",
-                    overlay=True
-                )
-            if cnt == max_samples:
-                break
+    def show_normal(self, max_samples=-1, denormalize=True):
+        self._iterate_and_visualize(
+            target_label=0,
+            max_samples=max_samples,
+            denormalize=denormalize,
+            save_dir=None,
+        )
+
+
+    def show_anomaly(self, max_samples=-1, denormalize=True):
+        self._iterate_and_visualize(
+            target_label=1,
+            max_samples=max_samples,
+            denormalize=denormalize,
+            save_dir=None,
+        )
+
+    def save_normal(self, save_dir, max_samples=-1, denormalize=True):
+        os.makedirs(save_dir, exist_ok=True)
+        self._iterate_and_visualize(
+            target_label=0,
+            max_samples=max_samples,
+            denormalize=denormalize,
+            save_dir=save_dir,
+        )
+
+    def save_anomaly(self, save_dir, max_samples=-1, denormalize=True):
+        os.makedirs(save_dir, exist_ok=True)
+        self._iterate_and_visualize(
+            target_label=1,
+            max_samples=max_samples,
+            denormalize=denormalize,
+            save_dir=save_dir,
+        )
 
 
 #####################################################################
