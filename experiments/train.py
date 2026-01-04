@@ -27,14 +27,12 @@ def parse_args():
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--category", type=str, required=True)
     parser.add_argument("--model", type=str, required=True)
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--batch_size", type=int, default=16)
-    parser.add_argument("--normalize", type=bool, default=True)
     parser.add_argument("--max_epochs", type=int, default=10)
+    parser.add_argument("--save_model", action="store_true")
     return parser.parse_args()
 
 
-def get_config(dataset, category, model, seed, normalize, batch_size, max_epochs):
+def get_config(dataset, category, model, max_epochs, save_model):
     config = merge_configs(
         load_config(CONFIG_DIR, "defaults.yaml"),
         load_config(os.path.join(CONFIG_DIR, "datasets"), f"{dataset}.yaml"),
@@ -42,12 +40,10 @@ def get_config(dataset, category, model, seed, normalize, batch_size, max_epochs
     )
 
     # Update conifig values
-    config["seed"] = seed
     config["dataset"]["path"] = config["path"][dataset]
     config["dataset"]["category"] = category
-    config["dataset"]["normalize"] = normalize
-    config["train_loader"]["batch_size"] = batch_size
     config["trainer"]["max_epochs"] = max_epochs
+    config["trainer"]["save_model"] = save_model
     return config
 
 
@@ -85,8 +81,17 @@ def run_training(config):
     else:
         trainer.fit(train_loader, max_epochs=max_epochs, valid_loader=None)
 
-    model.save(os.path.join(experiment_dir, weights_name))
-    save_config(config, os.path.join(experiment_dir, configs_name))
+    # Evaluation (Image-level / Pixel-level)
+    print(f"\n*** Evaluation: Test Dataset (normal + anomaly)")
+    evaluator = Evaluator(model)
+    image_results = evaluator.evaluate_image_level(test_loader)
+    print(" > Image: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
+    pixel_results = evaluator.evaluate_pixel_level(test_loader)
+    print(" > Pixel: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
+
+    if config["trainer"]["save_model"]:
+        model.save(os.path.join(experiment_dir, weights_name))
+        save_config(config, os.path.join(experiment_dir, configs_name))
 
 
 if __name__ == "__main__":
@@ -98,9 +103,6 @@ if __name__ == "__main__":
             "dataset": "mvtec",
             "category": "bottle",
             "model": "stfpm",
-            "seed": 42,
-            "normalize": True,
-            "batch_size": 16,
             "max_epochs": 10,
         }
     config = get_config(**args.__dict__)
