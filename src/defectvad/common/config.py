@@ -55,3 +55,25 @@ def _deep_merge(base, new):
         else:
             base[key] = deepcopy(value)
     return base
+
+
+def save_config(config, path):
+    if not isinstance(config, dict):
+        raise TypeError(f"config must be dict, got {type(config).__name__}")
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    yaml_blocks = []
+    for key, value in config.items():
+        block = yaml.safe_dump(
+            {key: value},
+            default_flow_style=False,
+            sort_keys=False,
+            allow_unicode=True,
+        ).rstrip()
+        yaml_blocks.append(block)
+
+    yaml_text = "\n\n".join(yaml_blocks) + "\n"
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(yaml_text)

@@ -56,7 +56,7 @@ def get_backbone_path(backbone: str):
         weights_path = os.path.join(backbone_dir, filename)
 
     if os.path.isfile(weights_path):
-        print(f" > {backbone} weight is loaded from {os.path.basename(weights_path)}.")
+        print(f" > {backbone} weights is loaded from {os.path.basename(weights_path)}.")
     else:
-        print(f" > {backbone} weight not found in {os.path.basename(weights_path)}.")
+        print(f" > {backbone} weights not found in {os.path.basename(weights_path)}.")
     return weights_path

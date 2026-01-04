@@ -6,13 +6,19 @@ import torch
 from torch.nn.utils import clip_grad_norm_
 
 # from .early_stopper import EarlyStopper
-# from .evaluator import Evaluator
+from .base_model import BaseModel
+from .evaluator import Evaluator
 
 
 class BaseTrainer(ABC):
     def __init__(self, model, loss_fn=None, device=None):
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = model.to(self.device)
+
+        if isinstance(model, torch.nn.Module):
+            self.model = model.to(self.device)
+        elif isinstance(model, BaseModel):
+            self.model = model.model.to(self.device)
+
         self.loss_fn = loss_fn.to(self.device) if isinstance(loss_fn, torch.nn.Module) else loss_fn
 
         self.train_loader = None
@@ -33,8 +39,8 @@ class BaseTrainer(ABC):
         self.max_epochs = 1
         self.max_steps = 1
 
-        # self.evaluator = Evaluator(self.model)
-        self.evaluator = None
+        self.evaluator = Evaluator(self.model)
+        # self.evaluator = None
 
     #######################################################
     # setup for anomaly detection models

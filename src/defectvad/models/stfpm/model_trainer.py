@@ -25,7 +25,7 @@ class STFPMTrainer(BaseTrainer):
             raise TypeError(f"Unexpected  model: {type(model).__name__}")
 
         loss_fn = STFPMLoss()
-        super().__init__(model.model, loss_fn=loss_fn)
+        super().__init__(model, loss_fn=loss_fn)
 
         self.max_epochs = max_epochs
 

@@ -1,0 +1,17 @@
+# configs/defaults.yaml
+
+#####################################################################
+# Datasets
+#####################################################################
+
+dataset:
+  name: mvtec
+  module: defectvad.data.datasets
+  class: MVTecDataset
+
+  path: null      # to be updated
+  category: null  # to be updated
+
+  img_size: 256
+  crop_size: null
+  normalize: true
