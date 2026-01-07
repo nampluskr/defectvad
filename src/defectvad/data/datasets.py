@@ -1,20 +1,25 @@
 # data/datasets.py
 
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
 import os
 from glob import glob
 import pandas as pd
 from PIL import Image
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, ConcatDataset, Subset
 import torchvision.transforms as T
 
 
-class BaseDataset(Dataset):
+class BaseDataset(Dataset, ABC):
+    NAME = ""    # dataset name: mvtec | visa | btad
+    CATEGORIES = []
+
     def __init__(self, root_dir, category, split, transform=None, mask_transform=None):
         self.root_dir = root_dir
-        self.category = category
-        self.category_dir = os.path.join(root_dir, category)
+        self.category = [category] if isinstance(category, str) else category
+        self.category.sort()
         self.split = split
         self.transform = transform or T.ToTensor()
         self.mask_transform = mask_transform or T.ToTensor()
@@ -27,9 +32,11 @@ class BaseDataset(Dataset):
         else:
             raise ValueError(f"split must be 'train' or 'test': {split}")
 
+    @abstractmethod
     def _load_train_samples(self):
         raise NotImplementedError
 
+    @abstractmethod
     def _load_test_samples(self):
         raise NotImplementedError
 
@@ -42,6 +49,8 @@ class BaseDataset(Dataset):
         return image
 
     def _load_mask(self, mask_path):
+        if self.split == "train":
+            return torch.tensor(0.0).float()
         if mask_path is None:
             return torch.zeros((1, self.height, self.width))
         mask = Image.open(mask_path).convert('L')
@@ -49,11 +58,18 @@ class BaseDataset(Dataset):
             mask = self.mask_transform(mask)
         return mask
 
-    def count_normal(self):
-        return sum(sample["label"] == 0 for sample in self.samples)
+    def count_category(self, category):
+        return sum(sample["category"] == category for sample in self.samples)
 
-    def count_anomaly(self):
-        return sum(sample["label"] == 1 for sample in self.samples)
+    def count_normal(self, category=None):
+        if category is None:
+            return sum(sample["label"] == 0 for sample in self.samples)
+        return sum(sample["label"] == 0 and sample["category"] == category for sample in self.samples)
+
+    def count_anomaly(self, category=None):
+        if category is None:
+            return sum(sample["label"] == 1 for sample in self.samples)
+        return sum(sample["label"] == 1 and sample["category"] == category for sample in self.samples)
 
     def __len__(self):
         return len(self.samples)
@@ -65,7 +81,27 @@ class BaseDataset(Dataset):
             "label": torch.tensor(sample["label"]).long(),
             "defect_type": sample["defect_type"],
             "mask": self._load_mask(sample["mask_path"]),
+            "dataset": self.NAME,
+            "category": sample["category"],
+            "filename": os.path.basename(sample['image_path']),
         }
+
+    def info(self):
+        print(f"\n*** {self.split.capitalize()} dataset: {self.NAME} (total {len(self)})")
+        for category in self.category:
+            print(f" > {category + ':':11} {self.count_category(category):4d} "
+                  f"(normal {self.count_normal(category):3d}, "
+                  f"anomaly {self.count_anomaly(category):3d})"
+            )
+
+    def subset(self, category):
+        return self.__class__(
+            root_dir=self.root_dir,
+            category=category,
+            split=self.split,
+            transform=self.transform,
+            mask_transform=self.mask_transform,
+        )
 
 
 # =========================================================
@@ -73,6 +109,7 @@ class BaseDataset(Dataset):
 # =========================================================
 
 class MVTecDataset(BaseDataset):
+    NAME = "mvtec"
     CATEGORIES = [
         'bottle', 'cable', 'capsule', 'carpet', 'grid',
         'hazelnut', 'leather', 'metal_nut', 'pill', 'screw',
@@ -80,40 +117,51 @@ class MVTecDataset(BaseDataset):
     ]
 
     def _load_train_samples(self):
-        normal_dir = os.path.join(self.category_dir, "train", "good")
-        for image_path in sorted(glob(os.path.join(normal_dir, "*.png"))):
-            self.samples.append({
-                "image_path": image_path,
-                "label": 0,
-                "defect_type": "normal",
-                "mask_path": None
-            })
+        for category in self.category:
+            assert category in self.CATEGORIES
+
+            category_dir = os.path.join(self.root_dir, category)
+            normal_dir = os.path.join(category_dir, "train", "good")
+            for image_path in sorted(glob(os.path.join(normal_dir, "*.png"))):
+                self.samples.append({
+                    "category": category,
+                    "image_path": image_path,
+                    "label": 0,
+                    "defect_type": "normal",
+                    "mask_path": None,
+                })
 
     def _load_test_samples(self):
-        test_dir = os.path.join(self.category_dir, "test")
-        mask_dir = os.path.join(self.category_dir, "ground_truth")
+        for category in self.category:
+            assert category in self.CATEGORIES
 
-        for defect_type in sorted(os.listdir(test_dir)):
-            for image_path in sorted(glob(os.path.join(test_dir, defect_type, "*.png"))):
+            category_dir = os.path.join(self.root_dir, category)
+            test_dir = os.path.join(category_dir, "test")
+            mask_dir = os.path.join(category_dir, "ground_truth")
 
-                if defect_type == "good":
-                    self.samples.append({
-                        "image_path": image_path,
-                        "label": 0,
-                        "defect_type": "normal",
-                        "mask_path": None
-                    })
-                else:
-                    image_name = os.path.basename(image_path)
-                    mask_name = os.path.splitext(image_name)[0] + "_mask.png"
-                    mask_path = os.path.join(mask_dir, defect_type, mask_name)
+            for defect_type in sorted(os.listdir(test_dir)):
+                for image_path in sorted(glob(os.path.join(test_dir, defect_type, "*.png"))):
 
-                    self.samples.append({
-                        "image_path": image_path,
-                        "label": 1,
-                        "defect_type": defect_type,
-                        "mask_path": mask_path
-                    })
+                    if defect_type == "good":
+                        self.samples.append({
+                            "category": category,
+                            "image_path": image_path,
+                            "label": 0,
+                            "defect_type": "normal",
+                            "mask_path": None
+                        })
+                    else:
+                        image_name = os.path.basename(image_path)
+                        mask_name = os.path.splitext(image_name)[0] + "_mask.png"
+                        mask_path = os.path.join(mask_dir, defect_type, mask_name)
+
+                        self.samples.append({
+                            "category": category,
+                            "image_path": image_path,
+                            "label": 1,
+                            "defect_type": defect_type,
+                            "mask_path": mask_path
+                        })
 
 
 # =========================================================
@@ -121,6 +169,7 @@ class MVTecDataset(BaseDataset):
 # =========================================================
 
 class ViSADataset(BaseDataset):
+    NAME = "visa"
     CATEGORIES = [
         'candle', 'capsules', 'cashew', 'chewinggum', 'fryum',
         'macaroni1', 'macaroni2', 'pcb1', 'pcb2', 'pcb3',
@@ -158,8 +207,8 @@ class ViSADataset(BaseDataset):
                 "label": label,
                 "defect_type": defect_type,
                 "mask_path": mask_path
-            } 
-            for image_path, label, defect_type, mask_path 
+            }
+            for image_path, label, defect_type, mask_path
             in zip(image_paths, labels, defect_types, mask_paths)
         ]
 
@@ -169,6 +218,7 @@ class ViSADataset(BaseDataset):
 # =========================================================
 
 class BTADDataset(BaseDataset):
+    NAME = "btad"
     CATEGORIES = ['01', '02', '03']
 
     def _load_train_samples(self):
@@ -211,3 +261,50 @@ class BTADDataset(BaseDataset):
                 "defect_type": "anomaly",
                 "mask_path": mask_path
             })
+
+if __name__ == "__main__":
+
+    DATA_DIR = "/mnt/d/deep_learning/datasets/mvtec"
+
+    if 1:
+        print("\n *** Train dataset:")
+        CATEGORY = ["carpet", "grid", "leather", "tile", "wood"]
+
+        dataset = MVTecDataset(
+            root_dir=DATA_DIR,
+            category=CATEGORY,
+            split="train",
+            transform=None,
+            mask_transform=None,
+        )
+
+        print(f"Dataset:  {dataset.NAME} ({len(dataset)})")
+        print(f"Dataset:  {dataset.category}")
+
+        for category in dataset.category:
+            print(f" > {category:10}: {dataset.count_category(category):4d} "
+                  f"(normal {dataset.count_normal(category):3d}, "
+                  f"anomaly {dataset.count_anomaly(category):3d})"
+            )
+
+
+    if 1:
+        print("\n *** Train dataset:")
+        CATEGORY = ["carpet", "grid", "leather", "tile", "wood"]
+
+        dataset = MVTecDataset(
+            root_dir=DATA_DIR,
+            category=CATEGORY,
+            split="test",
+            transform=None,
+            mask_transform=None,
+        )
+
+        print(f"Dataset:  {dataset.NAME} ({len(dataset)})")
+        print(f"Categories: {dataset.category}")
+
+        for category in dataset.category:
+            print(f" > {category:10}: {dataset.count_category(category):4d} "
+                  f"(normal {dataset.count_normal(category):3d}, "
+                  f"anomaly {dataset.count_anomaly(category):3d})"
+            )

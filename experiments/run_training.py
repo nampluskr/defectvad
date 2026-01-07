@@ -7,16 +7,20 @@
 DATASET_LIST = ["mvtec"]
 CATEGORY_LIST = {
     # "mvtec": ["carpet", "grid", "leather", "tile", "wood"],  # texture
-    "mvtec": ["bottle"]
+    "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
+    # "mvtec": [["bottle", "grid"]],  # test category
 }
 MODEL_LIST = ["stfpm"]
+# MODEL_LIST = ["fastflow"]
 # MODEL_LIST = ["reversedistill"]
-# MODEL_LIST = ["efficientad"]
-# MODEL_LIST = ["stfpm", "efficientad", "reversedistill"]
-# MODEL_LIST = ["cflow", "fastflow", "uflow"]
+# MODEL_LIST = ["reversedistill", "efficientad", "stfpm"]
+# MODEL_LIST = ["cflow", "fastflow", "csflow", "uflow"]
+# MODEL_LIST = ["dinomaly"]
 
 MAX_EPOCHS = 10
 SAVE_MODEL = True
+VALIDATE = True
+PIXEL_LEVEL = False
 
 #####################################################################
 # Script file path (absolute)
@@ -30,10 +34,10 @@ SCRIPT_FILE = os.path.join(PROJECT_DIR, "experiments", "train.py")
 
 
 #####################################################################
-# Main function
+# Run function
 #####################################################################
 
-def main(script_file, dataset_list, category_list, model_list):
+def run(script_file, dataset_list, category_list, model_list):
     import subprocess
 
     if not os.path.isfile(SCRIPT_FILE):
@@ -53,21 +57,28 @@ def main(script_file, dataset_list, category_list, model_list):
         for model in model_list:
             for category in category_list[dataset]:
                 counter += 1
+                category = [category] if isinstance(category, str) else category
 
                 print("\n" + "=" * 80)
-                print(f"[RUN {counter}/{total}] dataset: {dataset} | category: {category} | model: {model} "
-                      f" ({MAX_EPOCHS} epochs)"
+                print(f"[RUN {counter}/{total}] {dataset} | "
+                      f"{', '.join(category)} | {model} ({MAX_EPOCHS} epochs)"
                 )
                 print("=" * 80)
 
                 cmd = [sys.executable, script_file]
                 cmd.extend(["--dataset", dataset])
+                cmd.extend(["--category"] + category)
                 cmd.extend(["--model", model])
-                cmd.extend(["--category", category])
                 cmd.extend(["--max_epochs", str(MAX_EPOCHS)])
 
                 if SAVE_MODEL:
                     cmd.extend(["--save_model"])
+
+                if VALIDATE:
+                    cmd.extend(["--validate"])
+
+                if PIXEL_LEVEL:
+                    cmd.extend(["--pixel_level"])
 
                 result = subprocess.run(cmd, cwd=PROJECT_DIR)
 
@@ -78,10 +89,11 @@ def main(script_file, dataset_list, category_list, model_list):
                     print(f"  model   : {model}")
                     return
 
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 80)
     print("[FINISHED] All experiments completed!")
-    print("=" * 70)
+    print("=" * 80)
+
 
 if __name__ == "__main__":
 
-    main(SCRIPT_FILE, DATASET_LIST, CATEGORY_LIST, MODEL_LIST)
+    run(SCRIPT_FILE, DATASET_LIST, CATEGORY_LIST, MODEL_LIST)

@@ -56,3 +56,11 @@ test_loader:
   drop_last: false
   num_workers: 8
   pin_memory: true
+
+#####################################################################
+# Evaluator
+#####################################################################
+
+evaluator:
+  image_level: true
+  pixel_level: false
