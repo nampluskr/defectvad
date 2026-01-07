@@ -141,7 +141,7 @@ if __name__ == "__main__":
             "category": ["tile", "grid"],
             # "category": ["bottle"],
             "model": "stfpm",
-            "max_epochs": 1,
+            "max_epochs": 10,
             "save_model": False,
             "validate": True,
             "pixel_level": False

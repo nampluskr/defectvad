@@ -4,6 +4,7 @@ import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
 class Visualizer:
@@ -118,31 +119,40 @@ class Visualizer:
 
     def _iterate_and_visualize(self, target_label, max_samples=-1, denormalize=True, save_dir=None):
         cnt = 0
-        for i in range(self.images.shape[0]):
-            if self.labels is None or int(self.labels[i]) != target_label:
-                continue
+        total = len(self.images)
+        if max_samples > 0:
+            total = max_samples
 
-            save_path = None
-            if save_dir is not None:
-                prefix = "normal" if target_label == 0 else "anomaly"
-                save_path = os.path.join(save_dir, f"{prefix}_{cnt:03d}.png")
+        with tqdm(total=total, leave=False, ascii=True) as progress_bar:
+            progress_bar.set_description(f">> Visualizing ({'normal' if target_label == 0 else 'anomaly'})")
 
-            self.visualize(
-                self.images[i],
-                anomaly_map=self.anomaly_maps[i] if self.anomaly_maps is not None else None,
-                label=self.labels[i] if self.labels is not None else None,
-                pred_label=self.pred_labels[i] if self.pred_labels is not None else None,
-                mask=self.masks[i] if self.masks is not None else None,
-                pred_mask=self.pred_masks[i] if self.pred_masks is not None else None,
-                denormalize=denormalize,
-                cmap="jet",
-                overlay=True,
-                save_path=save_path,
-            )
+            for i in range(self.images.shape[0]):
+                if self.labels is None or int(self.labels[i]) != target_label:
+                    continue
 
-            cnt += 1
-            if max_samples > 0 and cnt >= max_samples:
-                break
+                save_path = None
+                if save_dir is not None:
+                    prefix = "normal" if target_label == 0 else "anomaly"
+                    save_path = os.path.join(save_dir, f"{prefix}_{cnt:03d}.png")
+
+                self.visualize(
+                    self.images[i],
+                    anomaly_map=self.anomaly_maps[i] if self.anomaly_maps is not None else None,
+                    label=self.labels[i] if self.labels is not None else None,
+                    pred_label=self.pred_labels[i] if self.pred_labels is not None else None,
+                    mask=self.masks[i] if self.masks is not None else None,
+                    pred_mask=self.pred_masks[i] if self.pred_masks is not None else None,
+                    denormalize=denormalize,
+                    cmap="jet",
+                    overlay=True,
+                    save_path=save_path,
+                )
+
+                cnt += 1
+                progress_bar.update(1)
+
+                if max_samples > 0 and cnt >= max_samples:
+                    break
 
     def show_normal(self, max_samples=-1, denormalize=True):
         self._iterate_and_visualize(
@@ -151,7 +161,6 @@ class Visualizer:
             denormalize=denormalize,
             save_dir=None,
         )
-
 
     def show_anomaly(self, max_samples=-1, denormalize=True):
         self._iterate_and_visualize(

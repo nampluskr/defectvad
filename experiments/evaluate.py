@@ -13,10 +13,9 @@ OUTPUT_DIR = os.path.join(PROJECT_DIR, "outputs")
 if SOURCE_CIR not in sys.path:
     sys.path.insert(0, SOURCE_CIR)
 
-from defectvad.common.config import load_config, merge_configs, save_config
+from defectvad.common.config import load_config
 from defectvad.common.utils import set_seed
-from defectvad.common.factory import create_dataset, create_dataloader
-from defectvad.common.factory import create_model, create_trainer
+from defectvad.common.factory import create_dataset, create_dataloader, create_model
 from defectvad.common.evaluator import Evaluator
 
 

@@ -1,5 +1,6 @@
 # common/base_trainer.py
 
+from abc import ABC
 import os
 from tqdm import tqdm
 
@@ -7,7 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 
 
-class BaseModel:
+class BaseModel(ABC):
     def __init__(self, model, device=None):
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
@@ -34,7 +35,7 @@ class BaseModel:
         images = images.to(self.device)
         predictions = self.model(images)
         outputs = {"image": images, **predictions}
-        return {k: v.cpu() for k, v in outputs.items() if torch.is_tensor(v)}
+        return {k: v.cpu() if torch.is_tensor(v) else v for k, v in outputs.items()}
 
     @torch.no_grad()
     def predict_batch(self, batch):
@@ -42,7 +43,7 @@ class BaseModel:
         images = batch["image"].to(self.device)
         predictions = self.model(images)
         outputs = {**batch, **predictions}
-        return {k: v.cpu() for k, v in outputs.items() if torch.is_tensor(v)}
+        return {k: v.cpu() if torch.is_tensor(v) else v for k, v in outputs.items()}
 
     @torch.no_grad()
     def predict_dataloader(self, dataloader):
@@ -57,7 +58,10 @@ class BaseModel:
                     outputs.setdefault(key, []).append(value)
 
         for key, value in outputs.items():
-            outputs[key] = torch.cat(value, dim=0)
+            if torch.is_tensor(value[0]):
+                outputs[key] = torch.cat(value, dim=0)
+            else:
+                outputs[key] = value
 
         return outputs
 

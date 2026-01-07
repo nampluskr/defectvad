@@ -13,13 +13,26 @@ OUTPUT_DIR = os.path.join(PROJECT_DIR, "outputs")
 if SOURCE_CIR not in sys.path:
     sys.path.insert(0, SOURCE_CIR)
 
-
-from defectvad.common.config import load_config, merge_configs, save_config
+from defectvad.common.config import load_config
 from defectvad.common.utils import set_seed
-from defectvad.common.factory import create_dataset, create_dataloader
-from defectvad.common.factory import create_model, create_trainer
+from defectvad.common.factory import create_dataset, create_dataloader, create_model
 from defectvad.common.evaluator import Evaluator
 from defectvad.common.visualizer import Visualizer
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", type=str, required=True)
+    parser.add_argument("--category", type=str, required=True, nargs="+")
+    parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--max_epochs", type=int, default=10)   # trainer
+    parser.add_argument("--calibrate", action="store_true")     # evaluator
+    parser.add_argument("--save_anomaly", action="store_true")  # visualizer
+    parser.add_argument("--save_normal", action="store_true")   # visualizer
+    parser.add_argument("--max_samples", type=int, default=-1)  # visualizer
+    parser.add_argument("--image_level", action="store_true")   # visualizer
+    parser.add_argument("--pixel_level", action="store_true")   # visualizer
+    return parser.parse_args()
 
 
 def set_environment(config):
@@ -27,15 +40,25 @@ def set_environment(config):
     os.environ["DATASET_DIR"] = config["path"]["dataset"]   # IMPORTTAT: used in dataset loading
 
 
-def run_prediction(dataset_name, category_name, model_name, max_epochs):
-    experiment_name = f"{dataset_name}_{category_name}_{model_name}_{max_epochs}epoch"
-    experiment_dir = os.path.join(OUTPUT_DIR, dataset_name, category_name, model_name)
+def predict(dataset, category, model, max_epochs, max_samples,
+    calibrate, save_anomaly, save_normal, image_level, pixel_level):
+    # ===============================================================
+    # Load configs
+    # ===============================================================
+
+    category = "-".join(sorted(category))
+    experiment_dir = os.path.join(OUTPUT_DIR, dataset, category, model)
+    experiment_name = f"{dataset}_{category}_{model}_{max_epochs}epoch"
     weights_name = f"weights_{experiment_name}.pth"
     configs_name = f"configs_{experiment_name}.yaml"
 
     config = load_config(experiment_dir, configs_name)
     set_environment(config)
     set_seed(config["seed"])
+
+    # ===============================================================
+    # Create Datasets / Dataloaders / Model
+    # ===============================================================
 
     train_dataset = create_dataset("train", config["dataset"])
     test_dataset = create_dataset("test", config["dataset"])
@@ -45,54 +68,80 @@ def run_prediction(dataset_name, category_name, model_name, max_epochs):
     model = create_model(config["model"])
     model.load(os.path.join(experiment_dir, weights_name))
 
-    if 1:
-        print("\n*** Prediction (dataloader):")
-        preds = model.predict(test_loader)
-        for k, v in preds.items():
-            if torch.is_tensor(v):
-                print(f" > {k}: {v.shape}")
+    # ===============================================================
+    # Prediction: test_loader (batch_size=1)
+    # ===============================================================
 
-    if 0:
-        print("\n*** Prediction (batch):")
-        batch = next(iter(test_loader))
-        preds = model.predict(batch)
-        for k, v in preds.items():
-            if torch.is_tensor(v):
-                print(f" > {k}: {v.shape}")
+    test_dataset.info()
 
-    if 0:
-        print("\n*** Prediction (images):")
-        batch = next(iter(test_loader))
-        batch = {"image": batch["image"], "label": batch["label"]}
-        preds = model.predict(batch)
-        for k, v in preds.items():
-            if torch.is_tensor(v):
-                print(f" > {k}: {v.shape}")
+    print("\n*** Prediction (dataloader):")
+    preds = model.predict(test_loader)
+    for k, v in preds.items():
+        print(f" > {k}: {v.shape if torch.is_tensor(v) else len(v)}")
 
-    # Visualize (without thresholds)
+    # ===============================================================
+    # Evaluation: test_loader (batch_size=1)
+    # ===============================================================
+
     visualizer = Visualizer(preds)
-    # visualizer.show_anomaly(max_samples=3)
-    # visualizer.show_normal(max_samples=3)
-
-    # Visualize (with thresholds)
     evaluator = Evaluator(model)
-    image_results = evaluator.evaluate_image_level(test_loader)
-    pixel_results = evaluator.evaluate_pixel_level(test_loader)
-    visualizer.set_image_threshold(image_results["th"])
-    visualizer.set_pixel_threshold(pixel_results["th"])
 
-    if 0:
-        visualizer.show_anomaly(max_samples=3, denormalize=config["dataset"]["normalize"])
-        visualizer.show_normal(max_samples=3, denormalize=config["dataset"]["normalize"])
+    print("\n*** Evaluation: Set thresholds")
 
-    if 1:
-        anomaly_dir = os.path.join(experiment_dir, "anomaly")
-        visualizer.save_anomaly(save_dir=anomaly_dir, denormalize=config["dataset"]["normalize"])
-        normal_dir = os.path.join(experiment_dir, "normal")
-        visualizer.save_normal(save_dir=normal_dir, denormalize=config["dataset"]["normalize"])
+    if calibrate:
+        if image_level:
+            image_thresholds = evaluator.calibrate_image_thresholds(train_loader)
+            visualizer.set_image_threshold(image_thresholds["95%"])
+
+        if pixel_level:
+            pixel_thresholds = evaluator.calibrate_pixel_thresholds(train_loader)
+            visualizer.set_pixel_threshold(pixel_thresholds["99%"])
+    else:
+        if image_level:
+            image_results = evaluator.evaluate_image_level(test_loader)
+            visualizer.set_image_threshold(image_results["th"])
+
+        if pixel_level:
+            pixel_results = evaluator.evaluate_pixel_level(test_loader)
+            visualizer.set_pixel_threshold(pixel_results["th"])
+
+    # ===============================================================
+    # Visualization: test_loader (batch_size=1)
+    # ===============================================================
+
+    print("\n*** Visualization: Save anomaly maps")
+
+    if save_anomaly:
+        visualizer.save_anomaly(
+            save_dir=os.path.join(experiment_dir, "anomaly"), 
+            max_samples=max_samples,
+            denormalize=config["dataset"]["normalize"], 
+        )
+
+    if save_normal:
+        visualizer.save_normal(
+            save_dir=os.path.join(experiment_dir, "normal"), 
+            max_samples=max_samples,
+            denormalize=config["dataset"]["normalize"],
+        )
 
 
 if __name__ == "__main__":
 
-    dataset, category, model, max_epochs = "mvtec", "bottle", "stfpm", 10
-    run_prediction(dataset, category, model, max_epochs)
+    if 1:
+        args = parse_args()
+        predict(**args.__dict__)
+    if 0:
+        args = {
+            "dataset": "mvtec",
+            "category": ["carpet", "grid", "leather", "tile", "wood"],
+            "model": "stfpm",
+            "max_epochs": 10,
+            "max_samples": 10,
+            "calibrate": False,
+            "save_anomaly": True,
+            "save_normal": True,
+            "image_level": True,
+            "pixel_level": True,
+        }
+        predict(**args)

@@ -31,7 +31,7 @@ class Evaluator:
         all_scores, all_labels = [], []
 
         with tqdm(dataloader, leave=False, ascii=True) as progress_bar:
-            progress_bar.set_description(" > Evaluation")
+            progress_bar.set_description(" > Image-level Evaluation")
             for batch in progress_bar:
                 images = batch["image"].to(self.device)
                 labels = batch["label"].to(self.device).long()
