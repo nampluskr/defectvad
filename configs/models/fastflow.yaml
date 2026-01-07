@@ -1,28 +1,30 @@
-# configs/models/stfpm.yaml
+# configs/models/fastflow.yaml
 
 #####################################################################
 # Model
 #####################################################################
 
 model:
-  name: stfpm
-  module: defectvad.models.stfpm.model_trainer
-  class: STFPM
+  name: fastflow
+  module: defectvad.models.fastflow.model_trainer
+  class: Fastflow
   params:
-    backbone: resnet50              # resnet18 | resnet50
-    layers:
-    - layer1
-    - layer2
-    - layer3
+    backbone: wide_resnet50_2
+    flow_steps: 8
+    conv3x3_only: false
+    hidden_ratio: 1.0
+    input_size: 
+    - 256
+    - 256
 
 #####################################################################
 # Trainer
 #####################################################################
 
 trainer:
-  name: stfpm
-  module: defectvad.models.stfpm.model_trainer
-  class: STFPMTrainer
+  name: fastflow
+  module: defectvad.models.fastflow.model_trainer
+  class: FastflowTrainer
   max_epochs: 20
   validate: true
   params: null

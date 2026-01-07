@@ -1,28 +1,30 @@
-# configs/models/stfpm.yaml
+# configs/models/csflow.yaml
 
 #####################################################################
 # Model
 #####################################################################
 
 model:
-  name: stfpm
-  module: defectvad.models.stfpm.model_trainer
-  class: STFPM
+  name: csflow
+  module: defectvad.models.csflow.model_trainer
+  class: Csflow
   params:
-    backbone: resnet50              # resnet18 | resnet50
-    layers:
-    - layer1
-    - layer2
-    - layer3
+    cross_conv_hidden_channels: 1024
+    n_coupling_blocks: 4
+    clamp: 3 
+    num_channels: 3
+    input_size: 
+    - 256
+    - 256
 
 #####################################################################
 # Trainer
 #####################################################################
 
 trainer:
-  name: stfpm
-  module: defectvad.models.stfpm.model_trainer
-  class: STFPMTrainer
+  name: csflow
+  module: defectvad.models.csflow.model_trainer
+  class: CsflowTrainer
   max_epochs: 20
   validate: true
   params: null

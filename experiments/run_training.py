@@ -1,4 +1,4 @@
-# experiments/run.py
+# experiments/run_training.py
 
 #####################################################################
 # Experiment split lists
@@ -7,18 +7,20 @@
 DATASET_LIST = ["mvtec"]
 CATEGORY_LIST = {
     # "mvtec": ["carpet", "grid", "leather", "tile", "wood"],  # texture
-    "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
+    # "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
     # "mvtec": [["bottle", "grid"]],  # test category
+    "mvtec": ["bottle"],  # test category
 }
-MODEL_LIST = ["stfpm"]
-# MODEL_LIST = ["fastflow"]
+# MODEL_LIST = ["stfpm"]
+MODEL_LIST = ["cflow"]
 # MODEL_LIST = ["reversedistill"]
 # MODEL_LIST = ["reversedistill", "efficientad", "stfpm"]
-# MODEL_LIST = ["cflow", "fastflow", "csflow", "uflow"]
+# MODEL_LIST = ["fastflow", "csflow", "uflow"]
 # MODEL_LIST = ["dinomaly"]
 
-MAX_EPOCHS = 10
-SAVE_MODEL = True
+
+MAX_EPOCHS = 3
+SAVE_MODEL = False
 VALIDATE = True
 PIXEL_LEVEL = False
 
@@ -71,14 +73,9 @@ def run(script_file, dataset_list, category_list, model_list):
                 cmd.extend(["--model", model])
                 cmd.extend(["--max_epochs", str(MAX_EPOCHS)])
 
-                if SAVE_MODEL:
-                    cmd.extend(["--save_model"])
-
-                if VALIDATE:
-                    cmd.extend(["--validate"])
-
-                if PIXEL_LEVEL:
-                    cmd.extend(["--pixel_level"])
+                if SAVE_MODEL:  cmd.extend(["--save_model"])
+                if VALIDATE:    cmd.extend(["--validate"])
+                if PIXEL_LEVEL: cmd.extend(["--pixel_level"])
 
                 result = subprocess.run(cmd, cwd=PROJECT_DIR)
 

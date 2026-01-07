@@ -1,4 +1,4 @@
-# experiments/run.py
+# experiments/run_prediction.py
 
 #####################################################################
 # Experiment split lists

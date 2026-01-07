@@ -1,4 +1,4 @@
-# experiments/evaluate.py
+# experiments/predict.py
 
 import os
 import sys

@@ -1,0 +1,39 @@
+# configs/models/uflow.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: uflow
+  module: defectvad.models.uflow.model_trainer
+  class: Uflow
+  params:
+    backbone: mcait     # mcait | resnet18 | wide_resnet50_2
+    flow_steps: 4
+    affine_clamp: 2.0
+    affine_subnet_channels_ratio: 1.0
+    permute_soft: false
+    input_size:
+    - 448
+    - 448
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: uflow
+  module: defectvad.models.uflow.model_trainer
+  class: UflowTrainer
+  max_epochs: 20
+  validate: true
+  params: null
+
+
+#####################################################################
+# Datasets
+#####################################################################
+
+dataset:
+  img_size: 448

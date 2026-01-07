@@ -1,4 +1,4 @@
-# experiments/run.py
+# experiments/run_evaluation.py
 
 #####################################################################
 # Experiment split lists
