@@ -5,7 +5,6 @@ import torch.optim as optim
 
 from defectvad.common.base_model import BaseModel
 from defectvad.common.base_trainer import BaseTrainer
-
 from .torch_model import FastflowModel
 from .loss import FastflowLoss
 

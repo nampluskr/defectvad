@@ -29,7 +29,7 @@ import torch.nn.functional as F  # noqa: N812
 from torch import nn
 
 # from anomalib.components.feature_extractors import TimmFeatureExtractor
-from defectvad.components.feature_extracotr import TimmFeatureExtractor
+from defectvad.components.feature_extractor import TimmFeatureExtractor
 
 AVAILABLE_EXTRACTORS = ["mcait", "resnet18", "wide_resnet50_2"]
 

@@ -1,0 +1,38 @@
+# configs/models/padim.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: padim
+  module: defectvad.models.padim.model_trainer
+  class: Padim
+  params:
+    backbone: resnet18
+    layers: 
+    - layer1
+    - layer2
+    - layer3
+    n_features: null
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: padim
+  module: defectvad.models.padim.model_trainer
+  class: PadimTrainer
+  params: null
+  max_epochs: 1         # << INPORTANT !!! (memory-based)
+  validate: false       # << INPORTANT !!! (memory-based)
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  img_size: 256
+  crop_size: 224
+  normalize: false

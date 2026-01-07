@@ -1,0 +1,39 @@
+# configs/models/dsr.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: dsr
+  module: defectvad.models.dsr.model_trainer
+  class: Dsr
+  params:
+    latent_anomaly_strength: 0.2
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: dsr
+  module: defectvad.models.dsr.model_trainer
+  class: DsrTrainer
+  params:
+    upsampling_train_ratio: 0.7
+  max_epochs: 10
+  validate: true
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  normalize: false    # << INPORTANT !!! (dsr)
+
+#####################################################################
+# Dataloader
+#####################################################################
+
+train_dataloader:
+  batch_size: 8

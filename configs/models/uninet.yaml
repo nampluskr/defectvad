@@ -1,0 +1,26 @@
+# configs/models/uninet.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: uninet
+  module: defectvad.models.uninet.model_trainer
+  class: UniNet
+  params:
+    student_backbone: wide_resnet50_2
+    teacher_backbone: wide_resnet50_2
+    temperature: 0.1
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: uninet
+  module: defectvad.models.uninet.model_trainer
+  class: UniNetTrainer
+  params: null
+  max_epochs: 5
+  validate: true

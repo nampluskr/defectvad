@@ -33,7 +33,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_config(dataset, category, model, max_epochs, save_model, validate, pixel_level):
+def get_config(dataset, category, model, max_epochs, validate, save_model, pixel_level):
     config = merge_configs(
         load_config(CONFIG_DIR, "defaults.yaml"),
         load_config(os.path.join(CONFIG_DIR, "datasets"), f"{dataset}.yaml"),
@@ -142,8 +142,8 @@ if __name__ == "__main__":
             # "category": ["bottle"],
             "model": "stfpm",
             "max_epochs": 10,
-            "save_model": False,
             "validate": True,
+            "save_model": False,
             "pixel_level": False
         }
         config = get_config(**args)

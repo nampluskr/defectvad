@@ -5,7 +5,6 @@ import torch.optim as optim
 
 from defectvad.common.base_model import BaseModel
 from defectvad.common.base_trainer import BaseTrainer
-
 from .torch_model import ReverseDistillationModel
 from .loss import ReverseDistillationLoss
 from .anomaly_map import AnomalyMapGenerationMode

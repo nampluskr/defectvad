@@ -1,0 +1,50 @@
+# configs/models/ganomaly.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: ganomaly
+  module: defectvad.models.ganomaly.model_trainer
+  class: Ganomaly
+  params:
+    input_size: 
+    - 256
+    - 256
+    num_input_channels: 3
+    n_features: 64
+    latent_vec_size: 100
+    extra_layers: 0
+    add_final_conv_layer: true
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: ganomaly
+  module: defectvad.models.ganomaly.model_trainer
+  class: GanomalyTrainer
+  params:
+    n_features: 64
+    latent_vec_size: 100
+    extra_layers: 0
+    add_final_conv_layer: true
+    wadv: 1
+    wcon: 50
+    wenc: 1
+    lr: 0.0002
+    beta1: 0.5
+    beta2: 0.999
+  max_epochs: 10
+  validate: true
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  normalize: true
+  mean: [0.5, 0.5, 0.5]
+  std: [0.5, 0.5, 0.5]

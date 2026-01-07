@@ -1,0 +1,38 @@
+# configs/models/dfkde.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: dfkde
+  module: defectvad.models.dfkde.model_trainer
+  class: Dfkde
+  params:
+    backbone: resnet18
+    layers: 
+    - layer4
+    n_pca_components: 16
+    feature_scaling_method: scale
+    max_training_points: 40000
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: dfkde
+  module: defectvad.models.dfkde.model_trainer
+  class: DfkdeTrainer
+  params: null
+  max_epochs: 1         # << INPORTANT !!! (memory-based)
+  validate: false       # << INPORTANT !!! (memory-based)
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  img_size: 256
+  crop_size: 224
+  normalize: true

@@ -1,0 +1,37 @@
+# configs/models/dfm.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: dfm
+  module: defectvad.models.dfm.model_trainer
+  class: DFM
+  params:
+    backbone: resnet50
+    layer: layer3 
+    pooling_kernel_size: 4
+    pca_level: 0.97
+    score_type: fre
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: dfm
+  module: defectvad.models.dfm.model_trainer
+  class: DFMTrainer
+  params: null
+  max_epochs: 1         # << INPORTANT !!! (memory-based)
+  validate: false       # << INPORTANT !!! (memory-based)
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  img_size: 256
+  crop_size: 224
+  normalize: false      # << INPORTANT !!! (dfm)

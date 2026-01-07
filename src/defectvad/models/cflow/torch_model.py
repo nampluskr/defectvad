@@ -39,7 +39,7 @@ from torch import nn
 
 # from anomalib.data import InferenceBatch
 # from anomalib.components import TimmFeatureExtractor
-from defectvad.components.feature_extracotr import TimmFeatureExtractor
+from defectvad.components.feature_extractor import TimmFeatureExtractor
 
 from .anomaly_map import AnomalyMapGenerator
 from .utils import cflow_head, get_logp, positional_encoding_2d

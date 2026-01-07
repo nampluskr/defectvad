@@ -1,0 +1,37 @@
+# configs/models/anomalydino.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: anomaly_dino
+  module: defectvad.models.anomalydino.model_trainer
+  class: AnomalyDINO
+  params:
+    encoder_name: dinov2_vit_small_14
+    num_neighbours: 1
+    masking: false
+    coreset_subsampling: false
+    sampling_ratio: 0.1
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: anomaly_dino
+  module: defectvad.models.anomalydino.model_trainer
+  class: AnomalyDINOTrainer
+  params: null
+  max_epochs: 1       # memory-based model
+  validate: false     # memory-based model
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  img_size: 256
+  crop_size: 224      # divisible by patch size (14)
+  normalize: false

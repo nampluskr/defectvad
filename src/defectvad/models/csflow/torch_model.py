@@ -32,7 +32,7 @@ from torchvision.models import efficientnet_b5
 
 # from anomalib.data import InferenceBatch
 # from anomalib.components.feature_extractors import TimmFeatureExtractor
-from defectvad.components.feature_extracotr import TimmFeatureExtractor
+from defectvad.components.feature_extractor import TimmFeatureExtractor
 from defectvad.common.backbone import get_backbone_path
 from .anomaly_map import AnomalyMapGenerator, AnomalyMapMode
 

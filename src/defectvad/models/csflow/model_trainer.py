@@ -26,7 +26,6 @@ class Csflow(BaseModel):
 
 class CsflowTrainer(BaseTrainer):
     def __init__(self, model):
-
         if not isinstance(model, Csflow):
             raise TypeError(f"Unexpected  model: {type(model).__name__}")
 

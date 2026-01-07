@@ -1,0 +1,43 @@
+# configs/models/draem.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: draem
+  module: defectvad.models.draem.model_trainer
+  class: Draem
+  params:
+    enable_sspcab: false
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: draem
+  module: defectvad.models.draem.model_trainer
+  class: DraemTrainer
+  params:
+    enable_sspcab: false
+    sspcab_lambda: 0.1
+    beta:
+    - 0.1
+    - 1.0
+  max_epochs: 10
+  validate: true
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  normalize: false      # << INPORTANT !!! (draem)
+
+#####################################################################
+# Dataloader
+#####################################################################
+
+train_loader:
+  batch_size: 8

@@ -23,6 +23,6 @@ trainer:
   name: stfpm
   module: defectvad.models.stfpm.model_trainer
   class: STFPMTrainer
+  params: null
   max_epochs: 20
   validate: true
-  params: null

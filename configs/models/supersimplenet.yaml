@@ -1,0 +1,38 @@
+# configs/models/supersimplenet.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: supersimplenet
+  module: defectvad.models.supersimplenet.model_trainer
+  class: Supersimplenet
+  params:
+    backbone: wide_resnet50_2.tv_in1k
+    layers: [layer2, layer3]
+    perlin_threshold: 0.2
+    adapt_cls_features: false
+    supervised: false
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: supersimplenet
+  module: defectvad.models.supersimplenet.model_trainer
+  class: SupersimplenetTrainer
+  params:
+    supervised: false
+  max_epochs: 10
+  validate: true
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  normalize: false
+
+# seed: 0

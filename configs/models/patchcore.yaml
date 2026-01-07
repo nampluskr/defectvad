@@ -1,0 +1,39 @@
+# configs/models/patchcore.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: patchcore
+  module: defectvad.models.patchcore.model_trainer
+  class: Patchcore
+  params:
+    backbone: wide_resnet50_2
+    layers:
+    - layer2
+    - layer3
+    num_neighbors: 9
+
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: patchcore
+  module: defectvad.models.patchcore.model_trainer
+  class: PatchcoreTrainer
+  params:
+    coreset_sampling_ratio: 0.1
+  max_epochs: 1         # << INPORTANT !!! (memory-based)
+  validate: false       # << INPORTANT !!! (memory-based)
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  img_size: 256
+  crop_size: 224
+  normalize: true

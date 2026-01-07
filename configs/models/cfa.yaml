@@ -1,0 +1,40 @@
+# configs/models/cfa.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: cfa
+  module: defectvad.models.cfa.model_trainer
+  class: Cfa
+  params:
+    backbone: wide_resnet50_2
+    gamma_c: 1
+    gamma_d: 2
+    num_nearest_neighbors: 3
+    num_hard_negative_features: 3
+    radius: 0.00001
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: cfa
+  module: defectvad.models.cfa.model_trainer
+  class: CfaTrainer
+  params:
+    num_nearest_neighbors: 3
+    num_hard_negative_features: 3
+    radius: 0.00001
+  max_epochs: 10
+  validate: true
+
+#####################################################################
+# Dataset
+#####################################################################
+
+dataset:
+  img_size: 256
+  crop_size: 224

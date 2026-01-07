@@ -1,0 +1,28 @@
+# configs/models/fre.yaml
+
+#####################################################################
+# Model
+#####################################################################
+
+model:
+  name: fre
+  module: defectvad.models.fre.model_trainer
+  class: FRE
+  params:
+    backbone: resnet50
+    layer: layer3
+    pooling_kernel_size: 2
+    input_dim: 65536
+    latent_dim: 220
+
+#####################################################################
+# Trainer
+#####################################################################
+
+trainer:
+  name: fre
+  module: defectvad.models.fre.model_trainer
+  class: FRETrainer
+  params: null
+  max_epochs: 10
+  validate: true

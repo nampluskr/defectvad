@@ -10,7 +10,6 @@ from torchvision.transforms.v2 import CenterCrop, Compose, Normalize, Resize
 
 from defectvad.common.base_model import BaseModel
 from defectvad.common.base_trainer import BaseTrainer
-
 from .torch_model import DinomalyModel
 from .optimizer import StableAdamW, WarmCosineScheduler
 

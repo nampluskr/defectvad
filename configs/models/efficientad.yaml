@@ -32,11 +32,11 @@ trainer:
 #####################################################################
 
 dataset:
-  normalize: false    # << INPORTANT !!!
+  normalize: false    # << INPORTANT !!! (efficientad)
 
 #####################################################################
 # Dataloader
 #####################################################################
 
 train_loader:
-  batch_size: 1       # << INPORTANT !!!
+  batch_size: 1       # << INPORTANT !!! (efficientad)
