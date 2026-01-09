@@ -2,8 +2,10 @@
 
 import os
 import sys
-import argparse
-import torch
+from argparse import ArgumentParser
+
+from utils import set_environment, get_last_file
+
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SOURCE_CIR = os.path.join(PROJECT_DIR, "src")
@@ -20,31 +22,31 @@ from defectvad.common.evaluator import Evaluator
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--category", type=str, required=True, nargs="+")
     parser.add_argument("--model", type=str, required=True)
-    parser.add_argument("--max_epochs", type=int, default=10)   # trainer
+    parser.add_argument("--timestamp", type=str, default=None)
+
     parser.add_argument("--image_level", action="store_true")   # evaluator
     parser.add_argument("--pixel_level", action="store_true")   # evaluator
     return parser.parse_args()
 
 
-def set_environment(config):
-    os.environ["BACKBONE_DIR"] = config["path"]["backbone"] # IMPORTANT: used in backbone loading
-    os.environ["DATASET_DIR"] = config["path"]["dataset"]   # IMPORTTAT: used in dataset loading
-
-
-def evaluate(dataset, category, model, max_epochs, image_level, pixel_level):
+def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None):
     # ===============================================================
     # Load configs
     # ===============================================================
 
     category = "-".join(sorted(category))
     experiment_dir = os.path.join(OUTPUT_DIR, dataset, category, model)
-    experiment_name = f"{dataset}_{category}_{model}_{max_epochs}epoch"
-    weights_name = f"weights_{experiment_name}.pth"
-    configs_name = f"configs_{experiment_name}.yaml"
+
+    if timestamp is None:
+        weights_name = get_last_file(experiment_dir, ext="*.pth")
+        configs_name = get_last_file(experiment_dir, ext="*.yaml")
+    else:
+        weights_name = f"weights_{dataset}_{category}_{model}_{timestamp}.pth"
+        configs_name = f"configs_{dataset}_{category}_{model}_{timestamp}.yaml"
 
     config = load_config(experiment_dir, configs_name)
     set_environment(config)
@@ -60,15 +62,15 @@ def evaluate(dataset, category, model, max_epochs, image_level, pixel_level):
     train_loader = create_dataloader(train_dataset, config["train_loader"])
     test_loader = create_dataloader(test_dataset, config["test_loader"])
 
-    model = create_model(config["model"])
-    model.load(os.path.join(experiment_dir, weights_name))
+    vad = create_model(config["model"])
+    vad.load(os.path.join(experiment_dir, weights_name))
 
     # ===============================================================
     # Evaluation: test_loader (batch_size=1)
     # ===============================================================
 
     test_dataset.info()
-    evaluator = Evaluator(model)
+    evaluator = Evaluator(vad)
 
     print("\n*** Evaluation start...")
     if image_level:
@@ -107,7 +109,6 @@ if __name__ == "__main__":
             "dataset": "mvtec",
             "category": ["carpet", "grid", "leather", "tile", "wood"],
             "model": "stfpm",
-            "max_epochs": 10,
             "image_level": True,
             "pixel_level": True,
         }

@@ -6,10 +6,10 @@
 
 DATASET_LIST = ["mvtec"]
 CATEGORY_LIST = {
-    "mvtec": ["carpet", "grid", "leather", "tile", "wood"],  # texture
+    # "mvtec": ["carpet", "grid", "leather", "tile", "wood"],  # texture
     # "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
     # "mvtec": [["bottle", "grid"]],  # test category
-    # "mvtec": ["bottle"],  # test category
+    "mvtec": ["bottle"],  # test category
 }
 MODEL_LIST = ["stfpm"]
 # MODEL_LIST = ["supersimplenet"]
@@ -21,8 +21,8 @@ MODEL_LIST = ["stfpm"]
 
 MAX_EPOCHS = 10          # 1 (memory-based: dfkde, dfm, padim, patchcore)
 VALIDATE = True        # False (memory-based: dfkde, dfm)
-SAVE_MODEL = False
-PIXEL_LEVEL = False
+SAVE_MODEL = True
+PIXEL_LEVEL = True
 
 #####################################################################
 # Script file path (absolute)

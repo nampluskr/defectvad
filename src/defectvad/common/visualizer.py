@@ -118,7 +118,7 @@ class Visualizer:
         plt.close(fig)
 
     def _iterate_and_visualize(self, target_label, max_samples=-1, denormalize=True, save_dir=None):
-        cnt = 0
+        cnt = 1
         total = len(self.images)
         if max_samples > 0:
             total = max_samples
@@ -210,6 +210,7 @@ def to_numpy_rgb(tensors, denormalize=False):
 
     return np.clip(images, 0, 1)
 
+
 def to_numpy_gray(tensors):
     if tensors.dim() == 4 and tensors.shape[1] == 1:
         tensors = tensors.squeeze(1)    # (B, 1, H, W) - > (B, H, W)
@@ -224,6 +225,7 @@ def to_numpy_gray(tensors):
 
     images = tensors.numpy()
     return np.clip(images, 0, 1)
+
 
 def overlay_map(image, map, alpha=0.5, cmap="jet"):
     map_norm = (map - map.min()) / (map.max() - map.min() + 1e-8)

@@ -7,8 +7,9 @@
 DATASET_LIST = ["mvtec"]
 CATEGORY_LIST = {
     # "mvtec": ["carpet", "grid", "leather", "tile", "wood"],  # texture
-    "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
+    # "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
     # "mvtec": [["bottle", "grid"]],  # test category
+    "mvtec": ["bottle"],  # test category
 }
 MODEL_LIST = ["stfpm"]
 # MODEL_LIST = ["fastflow"]
@@ -17,7 +18,6 @@ MODEL_LIST = ["stfpm"]
 # MODEL_LIST = ["cflow", "fastflow", "csflow", "uflow"]
 # MODEL_LIST = ["dinomaly"]
 
-MAX_EPOCHS = 10
 MAX_SAMPLES = 10
 
 CALIBRATE = False
@@ -64,16 +64,13 @@ def run(script_file, dataset_list, category_list, model_list):
                 category = [category] if isinstance(category, str) else category
 
                 print("\n" + "=" * 80)
-                print(f"[RUN {counter}/{total}] {dataset} | "
-                      f"{', '.join(category)} | {model} ({MAX_EPOCHS} epochs)"
-                )
+                print(f"[RUN {counter}/{total}] {dataset} | {', '.join(category)} | {model}")
                 print("=" * 80)
 
                 cmd = [sys.executable, script_file]
                 cmd.extend(["--dataset", dataset])
                 cmd.extend(["--category"] + category)
                 cmd.extend(["--model", model])
-                cmd.extend(["--max_epochs", str(MAX_EPOCHS)])
                 cmd.extend(["--max_samples", str(MAX_SAMPLES)])
 
                 if SAVE_ANOMALY: cmd.extend(["--save_anomaly"])

@@ -2,8 +2,11 @@
 
 import os
 import sys
-import argparse
-import torch
+from argparse import ArgumentParser
+from datetime import datetime
+
+from utils import set_environment
+
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SOURCE_CIR = os.path.join(PROJECT_DIR, "src")
@@ -22,10 +25,11 @@ from defectvad.common.visualizer import Visualizer
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--category", type=str, required=True, nargs="+")
     parser.add_argument("--model", type=str, required=True)
+
     parser.add_argument("--max_epochs", type=int, default=10)   # trainer
     parser.add_argument("--save_model", action="store_true")    # trainer
     parser.add_argument("--validate", action="store_true")      # trainer
@@ -50,11 +54,6 @@ def get_config(dataset, category, model, max_epochs, validate, save_model, pixel
     return config
 
 
-def set_environment(config):
-    os.environ["BACKBONE_DIR"] = config["path"]["backbone"] # IMPORTANT: used in backbone loading
-    os.environ["DATASET_DIR"] = config["path"]["dataset"]   # IMPORTTAT: used in dataset loading
-
-
 def train(config):
     # ===============================================================
     # Load configs
@@ -67,8 +66,9 @@ def train(config):
     model_name = config["model"]["name"]
     max_epochs = config["trainer"]["max_epochs"]
 
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     experiment_dir = os.path.join(OUTPUT_DIR, dataset_name, category_name, model_name)
-    experiment_name = f"{dataset_name}_{category_name}_{model_name}_{max_epochs}epoch"
+    experiment_name = f"{dataset_name}_{category_name}_{model_name}_{timestamp}"
     weights_name = f"weights_{experiment_name}.pth"
     configs_name = f"configs_{experiment_name}.yaml"
 
@@ -86,8 +86,8 @@ def train(config):
     # Training: train_loader
     # ===============================================================
 
-    model = create_model(config["model"])
-    trainer = create_trainer(model, config["trainer"])
+    vad = create_model(config["model"])
+    trainer = create_trainer(vad, config["trainer"])
     train_dataset.info()
 
     if config["trainer"]["validate"]:
@@ -96,7 +96,7 @@ def train(config):
         trainer.fit(train_loader, max_epochs=max_epochs, valid_loader=None)
 
     if config["trainer"]["save_model"]:
-        model.save(os.path.join(experiment_dir, weights_name))
+        vad.save(os.path.join(experiment_dir, weights_name))
         save_config(config, os.path.join(experiment_dir, configs_name))
 
     # ===============================================================
@@ -104,7 +104,7 @@ def train(config):
     # ===============================================================
 
     test_dataset.info()
-    evaluator = Evaluator(model)
+    evaluator = Evaluator(vad)
 
     print("\n*** Evaluation")
     print(f" > {category_name}:")
