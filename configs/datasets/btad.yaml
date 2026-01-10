@@ -1,13 +1,13 @@
-# configs/datasets/visa.yaml
+# configs/datasets/btad.yaml
 
 #####################################################################
 # Datasets
 #####################################################################
 
 dataset:
-  name: visa
-  module: defectvad.data.visa
-  class: ViSADataset
+  name: btad
+  module: defectvad.data.btad
+  class: BTADDataset
 
   path: null      # to be updated
   category: null  # to be updated

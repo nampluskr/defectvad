@@ -15,6 +15,7 @@ class MVTecDataset(BaseDataset):
     ]
 
     def _load_train_samples(self):
+        self.samples = []
         for category in self.category:
             assert category in self.CATEGORIES
 
@@ -30,6 +31,7 @@ class MVTecDataset(BaseDataset):
                 })
 
     def _load_test_samples(self):
+        self.samples = []
         for category in self.category:
             assert category in self.CATEGORIES
 
@@ -58,6 +60,6 @@ class MVTecDataset(BaseDataset):
                             "image_path": image_path,
                             "label": 1,
                             "defect_type": defect_type,
-                            "mask_path": mask_path
+                            "mask_path": mask_path if os.path.exists(mask_path) else None,
                         })
 

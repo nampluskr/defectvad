@@ -1,4 +1,4 @@
-# tests/datasets/visa.py
+# tests/datasets/mvtec.py
 
 import logging
 import os
@@ -16,7 +16,7 @@ if SOURCE_CIR not in sys.path:
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
-from defectvad.data.visa import ViSADataset
+from defectvad.data.mvtec import MVTecDataset
 from defectvad.data.transforms import get_image_transform, get_mask_transform
 from defectvad.common.utils import set_seed, set_logging
 from defectvad.common.visualizer import to_numpy_rgb, to_numpy_gray
@@ -27,8 +27,8 @@ def test(category):
     set_logging()
     logger = logging.getLogger(__name__)
 
-    dataset = ViSADataset(
-        root_dir="/mnt/d/deep_learning/datasets/visa",
+    dataset = MVTecDataset(
+        root_dir="/mnt/d/deep_learning/datasets/mvtec",
         category=category,
         split="test",
         transform=get_image_transform(img_size=256, normalize=True),
@@ -65,4 +65,4 @@ def test(category):
             break
 
 if __name__ == "__main__":
-    test(category=['pipe_fryum'])
+    test(category=['bottle'])

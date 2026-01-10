@@ -106,7 +106,7 @@ class BaseDataset(Dataset, ABC):
         samples = self.samples
 
         if category is not None:
-            samples = [s for s in samples if s["category"] == category]
+            samples = [sample for sample in samples if sample["category"] == category]
             subset.category = [category]
         else:
             subset.category = list(self.category)

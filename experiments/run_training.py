@@ -4,13 +4,14 @@
 # Experiment split lists
 #####################################################################
 
-DATASET_LIST = ["visa"]
+DATASET_LIST = ["btad"]
 CATEGORY_LIST = {
     # "mvtec": ["carpet", "grid", "leather", "tile", "wood"],  # texture
     # "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
     # "mvtec": [["bottle", "grid"]],  # test category
     # "mvtec": ["bottle"],  # test category
-    "visa": ["pipe_fryum"],  # test category
+    # "visa": ["pipe_fryum"],  # test category
+    "btad": ["01"],  # test category
 }
 # MODEL_LIST = ["stfpm"]
 # MODEL_LIST = ["efficientad"]

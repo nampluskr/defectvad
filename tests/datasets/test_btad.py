@@ -1,4 +1,4 @@
-# tests/datasets/visa.py
+# tests/datasets/btad.py
 
 import logging
 import os
@@ -16,7 +16,7 @@ if SOURCE_CIR not in sys.path:
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
-from defectvad.data.visa import ViSADataset
+from defectvad.data.btad import BTADDataset
 from defectvad.data.transforms import get_image_transform, get_mask_transform
 from defectvad.common.utils import set_seed, set_logging
 from defectvad.common.visualizer import to_numpy_rgb, to_numpy_gray
@@ -27,15 +27,15 @@ def test(category):
     set_logging()
     logger = logging.getLogger(__name__)
 
-    dataset = ViSADataset(
-        root_dir="/mnt/d/deep_learning/datasets/visa",
+    dataset = BTADDataset(
+        root_dir="/mnt/d/deep_learning/datasets/btad",
         category=category,
         split="test",
         transform=get_image_transform(img_size=256, normalize=True),
         mask_transform=get_mask_transform(img_size=256),
     ).info()
 
-    dataset = dataset.subset(label=1).info()
+    dataset = dataset.subset(category='03', label=1).info()
 
     dataloader = DataLoader(
         dataset=dataset,
@@ -45,7 +45,7 @@ def test(category):
         num_workers=8
     )
 
-    cnt, max_samples = 1, 3
+    cnt, max_samples = 1, 5
     for batch in dataloader:
         cnt += 1
         image = to_numpy_rgb(batch["image"], denormalize=True)[0]
@@ -65,4 +65,4 @@ def test(category):
             break
 
 if __name__ == "__main__":
-    test(category=['pipe_fryum'])
+    test(category=['01', '02', '03'])

@@ -51,7 +51,7 @@ class ViSADataset(BaseDataset):
                     "image_path": image_path,
                     "label": label,
                     "defect_type": defect_type,
-                    "mask_path": mask_path,
+                    "mask_path": mask_path if os.path.exists(mask_path) else None,
                 }
                 for image_path, label, defect_type, mask_path
                 in zip(image_paths, labels, defect_types, mask_paths)
