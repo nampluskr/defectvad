@@ -17,7 +17,8 @@ class ViSADataset(BaseDataset):
     def __init__(self, root_dir, category, split, transform=None, mask_transform=None):
         csv_path = os.path.join(root_dir, "split_csv", "1cls.csv")
         df = pd.read_csv(csv_path)
-        self.df = df[df["object"] == category].reset_index(drop=True)
+        category = [category] if isinstance(category, str) else list(category)
+        self.df = df[df["object"].isin(category)].reset_index(drop=True)
         self.root_dir = root_dir
 
         super().__init__(root_dir, category, split, transform, mask_transform)
@@ -31,21 +32,27 @@ class ViSADataset(BaseDataset):
         self._load_samples_from_df(df)
 
     def _load_samples_from_df(self, df):
-        image_paths = [os.path.join(self.root_dir, path) for path in df["image"]]
-        mask_paths = [
-            os.path.join(self.root_dir, path) if pd.notna(path) else None
-            for path in df["mask"]
-        ]
-        labels = (df["label"] != "normal").astype(int).tolist()
-        defect_types = df["label"].tolist()
+        self.samples = []
+        for category in self.category:
+            assert category in self.CATEGORIES
 
-        self.samples = [
-            {
-                "image_path": image_path,
-                "label": label,
-                "defect_type": defect_type,
-                "mask_path": mask_path
-            }
-            for image_path, label, defect_type, mask_path
-            in zip(image_paths, labels, defect_types, mask_paths)
-        ]
+            df_category = df[df["object"] == category]
+            image_paths = [os.path.join(self.root_dir, path) for path in df_category["image"]]
+            mask_paths = [
+                os.path.join(self.root_dir, path) if pd.notna(path) else None
+                for path in df_category["mask"]
+            ]
+            labels = (df_category["label"] != "normal").astype(int).tolist()
+            defect_types = df_category["label"].tolist()
+
+            self.samples.extend([
+                {
+                    "category": category,
+                    "image_path": image_path,
+                    "label": label,
+                    "defect_type": defect_type,
+                    "mask_path": mask_path,
+                }
+                for image_path, label, defect_type, mask_path
+                in zip(image_paths, labels, defect_types, mask_paths)
+            ])

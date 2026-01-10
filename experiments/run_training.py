@@ -4,17 +4,18 @@
 # Experiment split lists
 #####################################################################
 
-DATASET_LIST = ["mvtec"]
+DATASET_LIST = ["visa"]
 CATEGORY_LIST = {
     # "mvtec": ["carpet", "grid", "leather", "tile", "wood"],  # texture
     # "mvtec": [["carpet", "grid", "leather", "tile", "wood"]],  # texture
     # "mvtec": [["bottle", "grid"]],  # test category
-    "mvtec": ["bottle"],  # test category
+    # "mvtec": ["bottle"],  # test category
+    "visa": ["pipe_fryum"],  # test category
 }
-MODEL_LIST = ["stfpm", "efficientad"]
+# MODEL_LIST = ["stfpm"]
 # MODEL_LIST = ["efficientad"]
 # MODEL_LIST = ["reversedistill"]
-# MODEL_LIST = ["reversedistill", "efficientad", "stfpm"]
+MODEL_LIST = ["reversedistill", "efficientad", "stfpm"]
 # MODEL_LIST = ["fastflow", "csflow", "uflow"]
 # MODEL_LIST = ["dinomaly"]
 

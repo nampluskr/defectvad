@@ -63,8 +63,8 @@ def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None)
     # Create Datasets / Dataloaders / Model
     # ===============================================================
 
-    vad = create_model(config["model"]).info()
-    vad.load(os.path.join(experiment_dir, weight_file))
+    anomaly_model = create_model(config["model"]).info()
+    anomaly_model.load(os.path.join(experiment_dir, weight_file))
 
     train_dataset = create_dataset("train", config["dataset"])
     test_dataset = create_dataset("test", config["dataset"])
@@ -77,7 +77,7 @@ def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None)
     # ===============================================================
 
     test_dataset.info()
-    evaluator = Evaluator(vad)
+    evaluator = Evaluator(anomaly_model)
 
     logger.info("")
     logger.info("*** Evaluation start...")

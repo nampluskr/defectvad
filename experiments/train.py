@@ -84,8 +84,8 @@ def train(config):
     # Create Datasets / Dataloaders / Model / Trainer
     # ===============================================================
 
-    vad = create_model(config["model"]).info()
-    trainer = create_trainer(vad, config["trainer"])
+    anomaly_model = create_model(config["model"]).info()
+    trainer = create_trainer(anomaly_model, config["trainer"])
 
     train_dataset = create_dataset("train", config["dataset"])
     test_dataset = create_dataset("test", config["dataset"])
@@ -106,7 +106,7 @@ def train(config):
         trainer.fit(train_loader, max_epochs=max_epochs, valid_loader=None)
 
     if config["trainer"]["save_model"]:
-        vad.save(os.path.join(experiment_dir, weight_file))
+        anomaly_model.save(os.path.join(experiment_dir, weight_file))
         save_config(config, os.path.join(experiment_dir, config_file))
 
     # ===============================================================
@@ -114,7 +114,7 @@ def train(config):
     # ===============================================================
 
     test_dataset.info()
-    evaluator = Evaluator(vad)
+    evaluator = Evaluator(anomaly_model)
 
     logger.info("")
     logger.info("*** Evaluation")

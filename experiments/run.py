@@ -10,8 +10,8 @@ import subprocess
 
 SCRIPT_LIST = [
     "run_training.py",
-    "run_evaluation.py",
-    # "run_prediction.py",    
+    # "run_evaluation.py",
+    "run_prediction.py",    
 ]
 
 #####################################################################

@@ -70,8 +70,8 @@ def predict(dataset, category, model, max_samples, calibrate,
     # Create Datasets / Dataloaders / Model
     # ===============================================================
 
-    vad = create_model(config["model"]).info()
-    vad.load(os.path.join(experiment_dir, weight_file))
+    anomaly_model = create_model(config["model"]).info()
+    anomaly_model.load(os.path.join(experiment_dir, weight_file))
 
     train_dataset = create_dataset("train", config["dataset"])
     test_dataset = create_dataset("test", config["dataset"])
@@ -85,7 +85,7 @@ def predict(dataset, category, model, max_samples, calibrate,
     test_dataset.info()
     logger.info("")
     logger.info("*** Prediction (dataloader):")
-    preds = vad.predict(test_loader)
+    preds = anomaly_model.predict(test_loader)
 
     for k, v in preds.items():
         logger.info(f" > {k}: {v.shape if torch.is_tensor(v) else len(v)}")
@@ -95,7 +95,7 @@ def predict(dataset, category, model, max_samples, calibrate,
     # ===============================================================
 
     visualizer = Visualizer(preds)
-    evaluator = Evaluator(vad)
+    evaluator = Evaluator(anomaly_model)
 
     logger.info("")
     logger.info("*** Evaluation: Set thresholds")

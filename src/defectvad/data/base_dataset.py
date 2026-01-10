@@ -4,7 +4,9 @@ import logging
 from abc import ABC, abstractmethod
 import os
 from PIL import Image
+import copy
 
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
@@ -19,7 +21,7 @@ class BaseDataset(Dataset, ABC):
 
     def __init__(self, root_dir, category, split, transform=None, mask_transform=None):
         self.root_dir = root_dir
-        self.category = [category] if isinstance(category, str) else category
+        self.category = [category] if isinstance(category, str) else list(category)
         self.category.sort()
         self.split = split
         self.transform = transform or T.ToTensor()
@@ -50,13 +52,15 @@ class BaseDataset(Dataset, ABC):
         return image
 
     def _load_mask(self, mask_path):
-        if self.split == "train":
-            return torch.tensor(0.0).float()
+        # if self.split == "train":
+        #     return torch.tensor(0.0).float()
         if mask_path is None:
-            return torch.zeros((1, self.height, self.width))
+            return torch.zeros((1, self.height, self.width)).long()
+
         mask = Image.open(mask_path).convert('L')
         if self.mask_transform:
             mask = self.mask_transform(mask)
+        mask = (mask > 0).long()
         return mask
 
     def count_category(self, category):
@@ -89,7 +93,7 @@ class BaseDataset(Dataset, ABC):
 
     def info(self):
         logger.info("")
-        logging.info(f"*** {self.split.capitalize()} dataset: {self.NAME} (total {len(self)})")
+        logger.info(f"*** {self.split.capitalize()} dataset: {self.NAME} (total {len(self)})")
         for category in self.category:
             logging.info(f" > {category + ':':11} {self.count_category(category):4d} "
                   f"(normal {self.count_normal(category):3d}, "
@@ -97,11 +101,21 @@ class BaseDataset(Dataset, ABC):
             )
         return self
 
-    def subset(self, category):
-        return self.__class__(
-            root_dir=self.root_dir,
-            category=category,
-            split=self.split,
-            transform=self.transform,
-            mask_transform=self.mask_transform,
-        )
+    def subset(self, category=None, label=None, defect_type=None):
+        subset = copy.copy(self)
+        samples = self.samples
+
+        if category is not None:
+            samples = [s for s in samples if s["category"] == category]
+            subset.category = [category]
+        else:
+            subset.category = list(self.category)
+
+        if label is not None:
+            samples = [s for s in samples if s["label"] == label]
+
+        if defect_type is not None:
+            samples = [s for s in samples if s["defect_type"] == defect_type]
+
+        subset.samples = samples
+        return subset
