@@ -1,7 +1,10 @@
 # common/bacbone.py
 
+import logging
 import os
 
+
+logger = logging.getLogger(__name__)
 
 BACKBONE_WEIGHT_FILES = {
     "resnet18": "resnet18-f37072fd.pth",
@@ -56,7 +59,7 @@ def get_backbone_path(backbone: str):
         weights_path = os.path.join(backbone_dir, filename)
 
     if os.path.isfile(weights_path):
-        print(f" > {backbone} weights is loaded from {os.path.basename(weights_path)}.")
+        logger.info(f" > {backbone} weights is loaded from {os.path.basename(weights_path)}.")
     else:
-        print(f" > {backbone} weights not found in {os.path.basename(weights_path)}.")
+        logger.info(f" > {backbone} weights not found in {os.path.basename(weights_path)}.")
     return weights_path

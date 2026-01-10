@@ -1,5 +1,6 @@
 # common/evaluator.py
 
+import logging
 import torch
 from tqdm import tqdm
 
@@ -8,6 +9,9 @@ from torchmetrics.classification import BinaryF1Score, BinaryPrecisionRecallCurv
 from torchmetrics import MetricCollection
 
 from .base_model import BaseModel
+
+
+logger = logging.getLogger(__name__)
 
 
 class Evaluator:
@@ -144,7 +148,7 @@ class Evaluator:
         TODO:
         suspicious_ratio = (anomaly_map > pixel_threshold).float().mean()
         if suspicious_ratio > 0.01:
-            print("anomaly")
+            # "anomaly"
 
         # 이미지 판정
         image_thresholds = calibrate_image_thresholds(train_loader)
@@ -171,7 +175,7 @@ class Evaluator:
         pixel_min = float('inf')
         pixel_max = float('-inf')
 
-        print(" > Pass 1: Computing pixel statistics...")
+        logger.info(" > Pass 1: Computing pixel statistics...")
         for batch in tqdm(dataloader, desc="Pass 1", leave=False):
             images = batch["image"].to(self.device)
             labels = batch["label"]
@@ -214,7 +218,7 @@ class Evaluator:
         # Pass 2: Histogram 구축
         #############################################################
 
-        print(" > Pass 2: Building histogram...")
+        logging.info(" > Pass 2: Building histogram...")
         for batch in tqdm(dataloader, desc="Pass 2", leave=False):
             images = batch["image"].to(self.device)
             labels = batch["label"]
@@ -237,7 +241,7 @@ class Evaluator:
                 histogram[idx] += 1
 
         # Cumulative histogram
-        print(" > Computing quantiles...")
+        logging.info(" > Computing quantiles...")
         cumsum = histogram.cumsum(dim=0)
 
         # Quantile 계산

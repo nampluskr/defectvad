@@ -1,11 +1,12 @@
 # experiments/predict.py
 
+import logging
 import os
 import sys
 from argparse import ArgumentParser
 import torch
 
-from utils import set_environment, get_last_file
+from utils import set_environment, get_last_file, set_logging
 
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -49,13 +50,19 @@ def predict(dataset, category, model, max_samples, calibrate,
     experiment_dir = os.path.join(OUTPUT_DIR, dataset, category, model)
 
     if timestamp is None:
-        weights_name = get_last_file(experiment_dir, ext="*.pth")
-        configs_name = get_last_file(experiment_dir, ext="*.yaml")
+        weight_file = get_last_file(experiment_dir, ext="*.pth")
+        config_file = get_last_file(experiment_dir, ext="*.yaml")
+        log_file = get_last_file(experiment_dir, ext="*.log")
     else:
-        weights_name = f"weights_{dataset}_{category}_{model}_{timestamp}.pth"
-        configs_name = f"configs_{dataset}_{category}_{model}_{timestamp}.yaml"
+        weight_file = f"weights_{dataset}_{category}_{model}_{timestamp}.pth"
+        config_file = f"configs_{dataset}_{category}_{model}_{timestamp}.yaml"
+        config_file = f"train_{dataset}_{category}_{model}_{timestamp}.log"
 
-    config = load_config(experiment_dir, configs_name)
+    set_logging(experiment_dir, log_file)
+    logger = logging.getLogger(__name__)
+    logger.info(f" > Logging initialized: {log_file}")
+
+    config = load_config(experiment_dir, config_file)
     set_environment(config)
     set_seed(config["seed"])
 
@@ -63,24 +70,25 @@ def predict(dataset, category, model, max_samples, calibrate,
     # Create Datasets / Dataloaders / Model
     # ===============================================================
 
+    vad = create_model(config["model"])
+    vad.load(os.path.join(experiment_dir, weight_file))
+
     train_dataset = create_dataset("train", config["dataset"])
     test_dataset = create_dataset("test", config["dataset"])
     train_loader = create_dataloader(train_dataset, config["train_loader"])
     test_loader = create_dataloader(test_dataset, config["test_loader"])
-
-    vad = create_model(config["model"])
-    vad.load(os.path.join(experiment_dir, weights_name))
 
     # ===============================================================
     # Prediction: test_loader (batch_size=1)
     # ===============================================================
 
     test_dataset.info()
-
-    print("\n*** Prediction (dataloader):")
+    logger.info("")
+    logger.info("*** Prediction (dataloader):")
     preds = vad.predict(test_loader)
+
     for k, v in preds.items():
-        print(f" > {k}: {v.shape if torch.is_tensor(v) else len(v)}")
+        logger.info(f" > {k}: {v.shape if torch.is_tensor(v) else len(v)}")
 
     # ===============================================================
     # Evaluation: test_loader (batch_size=1)
@@ -89,7 +97,8 @@ def predict(dataset, category, model, max_samples, calibrate,
     visualizer = Visualizer(preds)
     evaluator = Evaluator(vad)
 
-    print("\n*** Evaluation: Set thresholds")
+    logger.info("")
+    logger.info("*** Evaluation: Set thresholds")
 
     if calibrate:
         if image_level:
@@ -112,7 +121,8 @@ def predict(dataset, category, model, max_samples, calibrate,
     # Visualization: test_loader (batch_size=1)
     # ===============================================================
 
-    print("\n*** Visualization: Save anomaly maps")
+    logger.info("")
+    logger.info("*** Visualization: Save anomaly maps")
 
     if save_anomaly:
         visualizer.save_anomaly(

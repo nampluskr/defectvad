@@ -1,11 +1,14 @@
 # common/base_trainer.py
 
+import logging
 from abc import ABC
 import os
 from tqdm import tqdm
 
 import torch
 from torch.utils.data import DataLoader
+
+logger = logging.getLogger(__name__)
 
 
 class BaseModel(ABC):
@@ -68,9 +71,9 @@ class BaseModel(ABC):
     def save(self, weights_path):
         os.makedirs(os.path.dirname(weights_path), exist_ok=True)
         torch.save(self.model.state_dict(), weights_path)
-        print(f" > {self.name} weights is saved to {os.path.basename(weights_path)}")
+        logger.info(f" > {self.name} weights is saved to {os.path.basename(weights_path)}")
 
     def load(self, weights_path, strict=True):
         state_dict = torch.load(weights_path, map_location=self.device, weights_only=True)
         self.model.load_state_dict(state_dict, strict=strict)
-        print(f" > {self.name} weights is loaded from {os.path.basename(weights_path)}")
+        logger.info(f" > {self.name} weights is loaded from {os.path.basename(weights_path)}")

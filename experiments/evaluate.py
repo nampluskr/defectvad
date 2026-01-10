@@ -1,10 +1,11 @@
 # experiments/evaluate.py
 
+import logging
 import os
 import sys
 from argparse import ArgumentParser
 
-from utils import set_environment, get_last_file
+from utils import set_environment, get_last_file, set_logging
 
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -42,13 +43,19 @@ def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None)
     experiment_dir = os.path.join(OUTPUT_DIR, dataset, category, model)
 
     if timestamp is None:
-        weights_name = get_last_file(experiment_dir, ext="*.pth")
-        configs_name = get_last_file(experiment_dir, ext="*.yaml")
+        weight_file = get_last_file(experiment_dir, ext="*.pth")
+        config_file = get_last_file(experiment_dir, ext="*.yaml")
+        log_file = get_last_file(experiment_dir, ext="*.log")
     else:
-        weights_name = f"weights_{dataset}_{category}_{model}_{timestamp}.pth"
-        configs_name = f"configs_{dataset}_{category}_{model}_{timestamp}.yaml"
+        weight_file = f"weights_{dataset}_{category}_{model}_{timestamp}.pth"
+        config_file = f"configs_{dataset}_{category}_{model}_{timestamp}.yaml"
+        config_file = f"train_{dataset}_{category}_{model}_{timestamp}.log"
 
-    config = load_config(experiment_dir, configs_name)
+    set_logging(experiment_dir, log_file)
+    logger = logging.getLogger(__name__)
+    logger.info(f" > Logging initialized: {log_file}")
+
+    config = load_config(experiment_dir, config_file)
     set_environment(config)
     set_seed(config["seed"])
 
@@ -56,14 +63,14 @@ def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None)
     # Create Datasets / Dataloaders / Model
     # ===============================================================
 
+    vad = create_model(config["model"])
+    vad.load(os.path.join(experiment_dir, weight_file))
+
     train_dataset = create_dataset("train", config["dataset"])
     test_dataset = create_dataset("test", config["dataset"])
 
     train_loader = create_dataloader(train_dataset, config["train_loader"])
     test_loader = create_dataloader(test_dataset, config["test_loader"])
-
-    vad = create_model(config["model"])
-    vad.load(os.path.join(experiment_dir, weights_name))
 
     # ===============================================================
     # Evaluation: test_loader (batch_size=1)
@@ -72,15 +79,16 @@ def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None)
     test_dataset.info()
     evaluator = Evaluator(vad)
 
-    print("\n*** Evaluation start...")
+    logger.info("")
+    logger.info("*** Evaluation start...")
     if image_level:
-        print(f" > {category}:")
+        logger.info(f" > {category}:")
         image_results = evaluator.evaluate_image_level(test_loader)
-        print("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
+        logger.info("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
 
     if pixel_level:
         pixel_results = evaluator.evaluate_pixel_level(test_loader)
-        print("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
+        logger.info("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
 
     categories = category.split("-")
     if len(categories) > 1:
@@ -89,15 +97,16 @@ def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None)
             test_loader = create_dataloader(test_dataset, config["test_loader"])
 
             if image_level:
-                print(f" > {category}:")
+                logger.info(f" > {category}:")
                 image_results = evaluator.evaluate_image_level(test_loader)
-                print("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
+                logger.info("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
 
             if pixel_level:
                 pixel_results = evaluator.evaluate_pixel_level(test_loader)
-                print("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
+                logger.info("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
 
-    print("*** Evaluation completed!")
+    logger.info("")
+    logger.info("*** Evaluation completed!")
 
 if __name__ == "__main__":
 

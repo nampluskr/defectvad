@@ -183,7 +183,7 @@ class DinoV2Loader:
 
         import os
         assert os.path.exists(weights_path)
-        print(f" > {model_type} weight is loaded from {os.path.basename(weights_path)}")
+        logging.info(f" > {model_type} weight is loaded from {os.path.basename(weights_path)}")
 
         # if not weight_path.exists():
         #     self._download_weights(model_type, architecture, patch_size)

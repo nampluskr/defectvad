@@ -1,5 +1,6 @@
 # src/defectvad/models/efficientad/trainer.py
 
+import logging
 from pathlib import Path
 import tqdm
 
@@ -14,6 +15,9 @@ from torchvision.datasets import ImageFolder
 from defectvad.common.base_model import BaseModel
 from defectvad.common.base_trainer import BaseTrainer
 from .torch_model import EfficientAdModel, EfficientAdModelSize, reduce_tensor_elems
+
+
+logger = logging.getLogger(__name__)
 
 
 class EfficientAd(BaseModel):
@@ -118,7 +122,7 @@ class EfficientAdTrainer(BaseTrainer):
             pretrained_models_dir / "efficientad_pretrained_weights" / f"pretrained_teacher_{model_size_str}.pth"
         )
         # logger.info(f"Load pretrained teacher model from {teacher_path}")
-        print(f" > Load pretrained teacher model from {os.path.basename(teacher_path)}")
+        logging.info(f" > Load pretrained teacher model from {os.path.basename(teacher_path)}")
         self.model.teacher.load_state_dict(
             torch.load(teacher_path, map_location=torch.device(self.device), weights_only=True),
         )

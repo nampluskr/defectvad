@@ -1,5 +1,6 @@
 # data/datasets.py
 
+import logging
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 import os
@@ -10,6 +11,9 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset, ConcatDataset, Subset
 import torchvision.transforms as T
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseDataset(Dataset, ABC):
@@ -87,9 +91,10 @@ class BaseDataset(Dataset, ABC):
         }
 
     def info(self):
-        print(f"\n*** {self.split.capitalize()} dataset: {self.NAME} (total {len(self)})")
+        logger.info("")
+        logging.info(f"*** {self.split.capitalize()} dataset: {self.NAME} (total {len(self)})")
         for category in self.category:
-            print(f" > {category + ':':11} {self.count_category(category):4d} "
+            logging.info(f" > {category + ':':11} {self.count_category(category):4d} "
                   f"(normal {self.count_normal(category):3d}, "
                   f"anomaly {self.count_anomaly(category):3d})"
             )
@@ -267,7 +272,7 @@ if __name__ == "__main__":
     DATA_DIR = "/mnt/d/deep_learning/datasets/mvtec"
 
     if 1:
-        print("\n *** Train dataset:")
+        logging.info("\n *** Train dataset:")
         CATEGORY = ["carpet", "grid", "leather", "tile", "wood"]
 
         dataset = MVTecDataset(
@@ -278,18 +283,18 @@ if __name__ == "__main__":
             mask_transform=None,
         )
 
-        print(f"Dataset:  {dataset.NAME} ({len(dataset)})")
-        print(f"Dataset:  {dataset.category}")
+        logging.info(f"Dataset:  {dataset.NAME} ({len(dataset)})")
+        logging.info(f"Dataset:  {dataset.category}")
 
         for category in dataset.category:
-            print(f" > {category:10}: {dataset.count_category(category):4d} "
+            logging.info(f" > {category:10}: {dataset.count_category(category):4d} "
                   f"(normal {dataset.count_normal(category):3d}, "
                   f"anomaly {dataset.count_anomaly(category):3d})"
             )
 
 
     if 1:
-        print("\n *** Train dataset:")
+        logging.info("\n *** Train dataset:")
         CATEGORY = ["carpet", "grid", "leather", "tile", "wood"]
 
         dataset = MVTecDataset(
@@ -300,11 +305,11 @@ if __name__ == "__main__":
             mask_transform=None,
         )
 
-        print(f"Dataset:  {dataset.NAME} ({len(dataset)})")
-        print(f"Categories: {dataset.category}")
+        logging.info(f"Dataset:  {dataset.NAME} ({len(dataset)})")
+        logging.info(f"Categories: {dataset.category}")
 
         for category in dataset.category:
-            print(f" > {category:10}: {dataset.count_category(category):4d} "
+            logging.info(f" > {category:10}: {dataset.count_category(category):4d} "
                   f"(normal {dataset.count_normal(category):3d}, "
                   f"anomaly {dataset.count_anomaly(category):3d})"
             )

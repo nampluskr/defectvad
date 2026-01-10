@@ -11,13 +11,12 @@ CATEGORY_LIST = {
     # "mvtec": [["bottle", "grid"]],  # test category
     "mvtec": ["bottle"],  # test category
 }
-MODEL_LIST = ["stfpm"]
-# MODEL_LIST = ["supersimplenet"]
+MODEL_LIST = ["stfpm", "efficientad"]
+# MODEL_LIST = ["efficientad"]
 # MODEL_LIST = ["reversedistill"]
 # MODEL_LIST = ["reversedistill", "efficientad", "stfpm"]
 # MODEL_LIST = ["fastflow", "csflow", "uflow"]
 # MODEL_LIST = ["dinomaly"]
-
 
 MAX_EPOCHS = 10          # 1 (memory-based: dfkde, dfm, padim, patchcore)
 VALIDATE = True        # False (memory-based: dfkde, dfm)
@@ -62,7 +61,7 @@ def run(script_file, dataset_list, category_list, model_list):
                 category = [category] if isinstance(category, str) else category
 
                 print("\n" + "=" * 80)
-                print(f"[RUN {counter}/{total}] {dataset} | "
+                print(f"[Training {counter}/{total}] {dataset} | "
                       f"{', '.join(category)} | {model} ({MAX_EPOCHS} epochs)"
                 )
                 print("=" * 80)
@@ -87,7 +86,7 @@ def run(script_file, dataset_list, category_list, model_list):
                     return
 
     print("\n" + "=" * 80)
-    print("[FINISHED] All experiments completed!")
+    print("[FINISHED] All training completed!")
     print("=" * 80)
 
 

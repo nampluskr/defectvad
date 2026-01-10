@@ -1,6 +1,14 @@
 # configs/defaults.yaml
 
 #####################################################################
+# Experiment
+#####################################################################
+experiment:
+  name: null        # {dataset}_{category}_{model}
+  timestamp: null   # {YYYYMMDD}_{hhmmss}
+  output_dir: null  # {OUTPUT_DIR} / {dataset} / {category} / {model}
+
+#####################################################################
 # Hyperparameters
 #####################################################################
 

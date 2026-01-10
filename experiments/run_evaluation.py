@@ -11,8 +11,8 @@ CATEGORY_LIST = {
     # "mvtec": [["bottle", "grid"]],  # test category
     "mvtec": ["bottle"],  # test category
 }
-MODEL_LIST = ["stfpm"]
-# MODEL_LIST = ["fastflow"]
+MODEL_LIST = ["stfpm", "efficientad"]
+# MODEL_LIST = ["efficientad"]
 # MODEL_LIST = ["reversedistill"]
 # MODEL_LIST = ["reversedistill", "efficientad", "stfpm"]
 # MODEL_LIST = ["cflow", "fastflow", "csflow", "uflow"]
@@ -59,7 +59,7 @@ def run(script_file, dataset_list, category_list, model_list):
                 category = [category] if isinstance(category, str) else category
 
                 print("\n" + "=" * 80)
-                print(f"[RUN {counter}/{total}] {dataset} | {', '.join(category)} | {model}")
+                print(f"[Evaluation {counter}/{total}] {dataset} | {', '.join(category)} | {model}")
                 print("=" * 80)
 
                 cmd = [sys.executable, script_file]
@@ -83,7 +83,7 @@ def run(script_file, dataset_list, category_list, model_list):
                     return
 
     print("\n" + "=" * 80)
-    print("[FINISHED] All experiments completed!")
+    print("[FINISHED] All evaluation completed!")
     print("=" * 80)
 
 

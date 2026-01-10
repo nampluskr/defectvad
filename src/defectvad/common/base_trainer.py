@@ -1,5 +1,6 @@
 # common/base_trainer.py
 
+import logging
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 import torch
@@ -8,6 +9,9 @@ from torch.nn.utils import clip_grad_norm_
 # from .early_stopper import EarlyStopper
 from .base_model import BaseModel
 from .evaluator import Evaluator
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseTrainer(ABC):
@@ -105,7 +109,9 @@ class BaseTrainer(ABC):
         self.valid_early_stop = False
         self.current_epoch = 0
         self.current_step = 0
-        print("\n*** Training start...")
+
+        logger.info("")
+        logger.info("*** Training start...")
 
     def on_train_epoch_start(self):
         self.global_epoch += 1
@@ -121,7 +127,7 @@ class BaseTrainer(ABC):
         self.epoch_info = f"[{self.current_epoch:3d}/{self.max_epochs}]"
         self.train_info = ", ".join([f"{k}:{v:.3f}" for k, v in outputs.items()])
         if self.valid_loader is None or self.evaluator is None:
-            print(f"{self.epoch_info} {self.train_info}")
+            logger.info(f"{self.epoch_info} {self.train_info}")
 
         if self.train_early_stopper is not None:
             metric_name = self.train_early_stopper.monitor
@@ -140,7 +146,7 @@ class BaseTrainer(ABC):
 
     def on_validation_epoch_end(self, outputs):
         valid_info = ", ".join([f"{k}:{v:.3f}" for k, v in outputs.items()])
-        print(f"{self.epoch_info} {self.train_info} | (img) {valid_info}")
+        logger.info(f"{self.epoch_info} {self.train_info} | (img) {valid_info}")
 
         if self.valid_early_stopper is not None:
             metric_name = self.valid_early_stopper.monitor
@@ -153,8 +159,9 @@ class BaseTrainer(ABC):
 
     def on_train_end(self):
         if self.train_early_stop or self.valid_early_stop:
-            print(f" > {self.early_stop_str}")
-        print("*** Training completed!")
+            logger.info(f" > {self.early_stop_str}")
+
+        logger.info("*** Training completed!")
 
     def on_fit_end(self): pass
 
@@ -210,3 +217,4 @@ class BaseTrainer(ABC):
         if self.evaluator is not None:
             return self.evaluator.evaluate_image_level(dataloader)
         return {}
+

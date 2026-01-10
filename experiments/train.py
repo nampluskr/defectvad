@@ -1,11 +1,12 @@
 # experiments/train.py
 
+import logging
 import os
 import sys
 from argparse import ArgumentParser
 from datetime import datetime
 
-from utils import set_environment
+from utils import set_environment, set_logging
 
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -37,7 +38,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_config(dataset, category, model, max_epochs, validate, save_model, pixel_level):
+def update_config(dataset, category, model, max_epochs, validate, save_model, pixel_level):
     config = merge_configs(
         load_config(CONFIG_DIR, "defaults.yaml"),
         load_config(os.path.join(CONFIG_DIR, "datasets"), f"{dataset}.yaml"),
@@ -51,6 +52,11 @@ def get_config(dataset, category, model, max_epochs, validate, save_model, pixel
     config["trainer"]["save_model"] = save_model
     config["trainer"]["validate"] = validate
     config["evaluator"]["pixel_level"] = pixel_level
+    
+    categories = "-".join(config["dataset"]["category"])
+    config["experiment"]["name"] = f"{dataset}_{categories}_{model}"
+    config["experiment"]["timestamp"] = datetime.now().strftime("%Y%m%d_%H%M%S")
+    config["experiment"]["output_dir"] = os.path.join(OUTPUT_DIR, dataset, categories, model)
     return config
 
 
@@ -58,23 +64,28 @@ def train(config):
     # ===============================================================
     # Load configs
     # ===============================================================
+
+    experiment_dir = config["experiment"]["output_dir"]
+    experiment_name = config["experiment"]["name"]
+    timestamp = config["experiment"]["timestamp"]
+
+    weight_file = f"weights_{experiment_name}_{timestamp}.pth"
+    config_file = f"configs_{experiment_name}_{timestamp}.yaml"
+    log_file = f"train_{experiment_name}_{timestamp}.log"
+
+    set_logging(experiment_dir, log_file)
+    logger = logging.getLogger(__name__)
+    logger.info(f" > Logging initialized: {log_file}")
+
     set_environment(config)
     set_seed(config["seed"])
-
-    dataset_name = config["dataset"]["name"]
-    category_name = "-".join(config["dataset"]["category"])
-    model_name = config["model"]["name"]
-    max_epochs = config["trainer"]["max_epochs"]
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    experiment_dir = os.path.join(OUTPUT_DIR, dataset_name, category_name, model_name)
-    experiment_name = f"{dataset_name}_{category_name}_{model_name}_{timestamp}"
-    weights_name = f"weights_{experiment_name}.pth"
-    configs_name = f"configs_{experiment_name}.yaml"
 
     # ===============================================================
     # Create Datasets / Dataloaders / Model / Trainer
     # ===============================================================
+
+    vad = create_model(config["model"])
+    trainer = create_trainer(vad, config["trainer"])
 
     train_dataset = create_dataset("train", config["dataset"])
     test_dataset = create_dataset("test", config["dataset"])
@@ -86,9 +97,8 @@ def train(config):
     # Training: train_loader
     # ===============================================================
 
-    vad = create_model(config["model"])
-    trainer = create_trainer(vad, config["trainer"])
     train_dataset.info()
+    max_epochs = config["trainer"]["max_epochs"]
 
     if config["trainer"]["validate"]:
         trainer.fit(train_loader, max_epochs=max_epochs, valid_loader=test_loader)
@@ -96,8 +106,8 @@ def train(config):
         trainer.fit(train_loader, max_epochs=max_epochs, valid_loader=None)
 
     if config["trainer"]["save_model"]:
-        vad.save(os.path.join(experiment_dir, weights_name))
-        save_config(config, os.path.join(experiment_dir, configs_name))
+        vad.save(os.path.join(experiment_dir, weight_file))
+        save_config(config, os.path.join(experiment_dir, config_file))
 
     # ===============================================================
     # Evaluation: test_loader (batch_size=1)
@@ -106,14 +116,16 @@ def train(config):
     test_dataset.info()
     evaluator = Evaluator(vad)
 
-    print("\n*** Evaluation")
-    print(f" > {category_name}:")
+    logger.info("")
+    logger.info("*** Evaluation")
+    categories = "-".join(config["dataset"]["category"])
+    logger.info(f" > {categories}:")
     image_results = evaluator.evaluate_image_level(test_loader)
-    print("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
+    logger.info("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
 
     if config["evaluator"]["pixel_level"]:
         pixel_results = evaluator.evaluate_pixel_level(test_loader)
-        print("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
+        logger.info("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
 
     categories = config["dataset"]["category"]
     if len(categories) > 1:
@@ -121,20 +133,20 @@ def train(config):
             test_dataset = test_dataset.subset(category)
             test_loader = create_dataloader(test_dataset, config["test_loader"])
 
-            print(f" > {category}:")
+            logger.info(f" > {category}:")
             image_results = evaluator.evaluate_image_level(test_loader)
-            print("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
+            logger.info("   Image-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in image_results.items()]))
 
             if config["evaluator"]["pixel_level"]:
                 pixel_results = evaluator.evaluate_pixel_level(test_loader)
-                print("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
+                logger.info("   Pixel-level: " + ", ".join([f"{k}:{v:.3f}" for k, v in pixel_results.items()]))
 
 
 if __name__ == "__main__":
 
     if 1:
         args = parse_args()
-        config = get_config(**args.__dict__)
+        config = update_config(**args.__dict__)
     if 0:
         args = {
             "dataset": "mvtec",
@@ -146,6 +158,6 @@ if __name__ == "__main__":
             "save_model": False,
             "pixel_level": False
         }
-        config = get_config(**args)
+        config = update_config(**args)
 
     train(config)

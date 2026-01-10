@@ -1,5 +1,6 @@
 # dsr/trainer.py
 
+import logging
 import os
 from pathlib import Path
 import torch
@@ -12,6 +13,9 @@ from .torch_model import DsrModel
 from .loss import DsrSecondStageLoss, DsrThirdStageLoss
 from .anomaly_generator import DsrAnomalyGenerator
 from defectvad.components.perlin import PerlinAnomalyGenerator
+
+
+logger = logging.getLogger(__name__)
 
 
 class Dsr(BaseModel):
@@ -48,9 +52,9 @@ class DsrTrainer(BaseTrainer):
         self.second_phase_epoch = int(num_steps * self.upsampling_train_ratio)
         anneal_epoch = int(0.8 * self.second_phase_epoch)
 
-        print(f" > Phase 1 will run for {self.second_phase_epoch} epochs")
-        print(f" > Learning rate will anneal at epoch {anneal_epoch}")
-        print(f" > Phase 2 will start at epoch {self.second_phase_epoch + 1}")
+        logging.info(f" > Phase 1 will run for {self.second_phase_epoch} epochs")
+        logging.info(f" > Learning rate will anneal at epoch {anneal_epoch}")
+        logging.info(f" > Phase 2 will start at epoch {self.second_phase_epoch + 1}")
 
         # Phase 1 optimizer (reconstruction + anomaly detection)
         self.optimizer_d = optim.Adam(
@@ -82,8 +86,8 @@ class DsrTrainer(BaseTrainer):
 
         # Phase 2 시작 시 Phase 1 모듈들을 고정 (한 번만 실행)
         if self.current_epoch == self.second_phase_epoch + 1 and not self.phase_switched:
-            print(" > Now training upsampling module (Phase 2)")
-            print(" > Freezing Phase 1 modules...")
+            logging.info(" > Now training upsampling module (Phase 2)")
+            logging.info(" > Freezing Phase 1 modules...")
 
             for param in self.model.image_reconstruction_network.parameters():
                 param.requires_grad = False

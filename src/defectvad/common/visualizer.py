@@ -1,10 +1,14 @@
 # common/predictor.py
 
+import logging
 import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+
+
+logger = logging.getLogger(__name__)
 
 
 class Visualizer:
@@ -152,6 +156,7 @@ class Visualizer:
                 progress_bar.update(1)
 
                 if max_samples > 0 and cnt >= max_samples:
+                    logger.info(f" > {cnt} {prefix} images saved!")
                     break
 
     def show_normal(self, max_samples=-1, denormalize=True):
