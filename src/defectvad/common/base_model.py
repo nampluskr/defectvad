@@ -1,4 +1,4 @@
-# common/base_trainer.py
+# defectvad/common/base_trainer.py
 
 import logging
 from abc import ABC
@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 import torch
 from torch.utils.data import DataLoader
+
 
 logger = logging.getLogger(__name__)
 
@@ -77,3 +78,25 @@ class BaseModel(ABC):
         state_dict = torch.load(weights_path, map_location=self.device, weights_only=True)
         self.model.load_state_dict(state_dict, strict=strict)
         logger.info(f" > {self.name} weights is loaded from {os.path.basename(weights_path)}")
+
+    def info(self):
+        total_params = sum(p.numel() for p in self.model.parameters())
+        trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+
+        total_bytes = 0
+        for tensor in self.model.state_dict().values():
+            total_bytes += tensor.numel() * tensor.element_size()
+
+        if total_bytes >= 1024 ** 3:
+            size_value = total_bytes / (1024 ** 3)
+            size_unit = "GB"
+        else:
+            size_value = total_bytes / (1024 ** 2)
+            size_unit = "MB"
+
+        logger.info("")
+        logging.info(f"*** {self.name}:")
+        logger.info(f" > Total params.:     {total_params:,}")
+        logger.info(f" > Trainable params.: {trainable_params:,}")
+        logger.info(f" > Model size (disk): {size_value:.2f} {size_unit}")
+        return self

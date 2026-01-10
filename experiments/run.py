@@ -4,12 +4,19 @@ import os
 import sys
 import subprocess
 
+#####################################################################
+# Script lists
+#####################################################################
 
 SCRIPT_LIST = [
     "run_training.py",
     "run_evaluation.py",
-    "run_prediction.py",    
+    # "run_prediction.py",    
 ]
+
+#####################################################################
+# Run function
+#####################################################################
 
 def run(script_list):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,8 +24,9 @@ def run(script_list):
     for i, script_file in enumerate(script_list, 1):
         script_path = os.path.join(base_dir, script_file)
 
-        print(f"\n>> [RUN {i}/{len(script_list)}] {script_file}")
-        print("-" * 80)
+        print("\n" + "=" * 80)
+        print(f"[RUN {i}/{len(script_list)}] {script_file}")
+        print("=" * 80)
 
         if not os.path.exists(script_path):
             print(f"[Error] Script not found: {script_path}")
@@ -26,8 +34,9 @@ def run(script_list):
 
         try:
             subprocess.run([sys.executable, script_path], check=True)
-            print("\n" + "-" * 80)
-            print(f">> Completed: {script_file}")
+            # print("\n" + "=" * 80)
+            # print(f">> Completed: {script_file}")
+            # print("=" * 80)
 
         except subprocess.CalledProcessError as e:
             print(f"[Error] Script '{script_file}' failed (exit code={e.returncode})")

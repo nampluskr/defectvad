@@ -5,7 +5,7 @@ import os
 import sys
 from argparse import ArgumentParser
 
-from utils import set_environment, get_last_file, set_logging
+from utils import set_environment, get_last_file
 
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -17,7 +17,7 @@ if SOURCE_CIR not in sys.path:
     sys.path.insert(0, SOURCE_CIR)
 
 from defectvad.common.config import load_config
-from defectvad.common.utils import set_seed
+from defectvad.common.utils import set_seed, set_logging
 from defectvad.common.factory import create_dataset, create_dataloader, create_model
 from defectvad.common.evaluator import Evaluator
 
@@ -63,7 +63,7 @@ def evaluate(dataset, category, model, image_level, pixel_level, timestamp=None)
     # Create Datasets / Dataloaders / Model
     # ===============================================================
 
-    vad = create_model(config["model"])
+    vad = create_model(config["model"]).info()
     vad.load(os.path.join(experiment_dir, weight_file))
 
     train_dataset = create_dataset("train", config["dataset"])

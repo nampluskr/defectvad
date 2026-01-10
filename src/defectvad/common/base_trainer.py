@@ -1,4 +1,4 @@
-# common/base_trainer.py
+# defectvad/common/base_trainer.py
 
 import logging
 from abc import ABC, abstractmethod

@@ -1,4 +1,4 @@
-# common/config.py
+# defectvad/common/config.py
 
 import os
 import yaml

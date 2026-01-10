@@ -1,4 +1,4 @@
-# common/predictor.py
+# defectvad/common/predictor.py
 
 import logging
 import os
@@ -156,8 +156,10 @@ class Visualizer:
                 progress_bar.update(1)
 
                 if max_samples > 0 and cnt >= max_samples:
-                    logger.info(f" > {cnt} {prefix} images saved!")
                     break
+
+        if save_dir is not None:
+            logger.info(f" > {cnt} {prefix} images saved!")
 
     def show_normal(self, max_samples=-1, denormalize=True):
         self._iterate_and_visualize(

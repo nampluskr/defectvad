@@ -1,4 +1,4 @@
-# common/factory.py
+# defectvad/common/factory.py
 
 import importlib
 from torch.utils.data import DataLoader

@@ -1,4 +1,4 @@
-# data/transforms.py
+# defectvad/data/transforms.py
 
 import torchvision.transforms as T
 

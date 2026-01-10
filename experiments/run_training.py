@@ -60,11 +60,11 @@ def run(script_file, dataset_list, category_list, model_list):
                 counter += 1
                 category = [category] if isinstance(category, str) else category
 
-                print("\n" + "=" * 80)
-                print(f"[Training {counter}/{total}] {dataset} | "
+                print("\n" + "-" * 80)
+                print(f" [Training {counter}/{total}] {dataset} | "
                       f"{', '.join(category)} | {model} ({MAX_EPOCHS} epochs)"
                 )
-                print("=" * 80)
+                print("-" * 80)
 
                 cmd = [sys.executable, script_file]
                 cmd.extend(["--dataset", dataset])
@@ -85,9 +85,7 @@ def run(script_file, dataset_list, category_list, model_list):
                     print(f"  model   : {model}")
                     return
 
-    print("\n" + "=" * 80)
-    print("[FINISHED] All training completed!")
-    print("=" * 80)
+    print(" [FINISHED] All training completed!")
 
 
 if __name__ == "__main__":

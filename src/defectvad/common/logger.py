@@ -1,4 +1,4 @@
-# common/logger.py
+# defectvad/common/logger.py
 
 import logging
 from typing import Optional

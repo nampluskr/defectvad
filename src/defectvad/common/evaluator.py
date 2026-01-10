@@ -1,4 +1,4 @@
-# common/evaluator.py
+# defectvad/common/evaluator.py
 
 import logging
 import torch

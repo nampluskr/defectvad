@@ -63,9 +63,9 @@ def run(script_file, dataset_list, category_list, model_list):
                 counter += 1
                 category = [category] if isinstance(category, str) else category
 
-                print("\n" + "=" * 80)
-                print(f"[Prediction {counter}/{total}] {dataset} | {', '.join(category)} | {model}")
-                print("=" * 80)
+                print("\n" + "-" * 80)
+                print(f" [Prediction {counter}/{total}] {dataset} | {', '.join(category)} | {model}")
+                print("-" * 80)
 
                 cmd = [sys.executable, script_file]
                 cmd.extend(["--dataset", dataset])
@@ -88,9 +88,7 @@ def run(script_file, dataset_list, category_list, model_list):
                     print(f"  model   : {model}")
                     return
 
-    print("\n" + "=" * 80)
-    print("[FINISHED] All prediction completed!")
-    print("=" * 80)
+    print(" [FINISHED] All prediction completed!")
 
 
 if __name__ == "__main__":

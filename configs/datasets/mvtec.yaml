@@ -6,7 +6,7 @@
 
 dataset:
   name: mvtec
-  module: defectvad.data.datasets
+  module: defectvad.data.mvtec
   class: MVTecDataset
 
   path: null      # to be updated

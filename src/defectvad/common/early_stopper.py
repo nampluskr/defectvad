@@ -1,4 +1,4 @@
-# common/early_stopper.py
+# defectvad/common/early_stopper.py
 
 class EarlyStopper:
     def __init__(self, patience=10, min_delta=1e-3, mode="max", target_value=None, monitor="loss"):

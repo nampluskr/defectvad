@@ -2,7 +2,7 @@
 
 ## Setup
 
-### 1. 환경 파일(`configs/defaults.yaml`) 수정: 폴더 경로, 운영체제별 설정
+### 1. 환경 파일(`configs/defaults.yaml`): 폴더 경로, 운영체제별 설정
 
 **Linux**
 ```yaml
@@ -128,7 +128,10 @@ defectvad/                              # project_dir
 │       │   └── *.py                    # copied from anomalib
 │       ├── data/                       # Dataset / transforms
 │       │   ├── __init__.py
-│       │   ├── datasets.py             # BaseDataset, MVTecDataset, ViSADataset, BTADDataset
+│       │   ├── base_datasets.py        # BaseDataset
+│       │   ├── mvtec.py                # MVTecDataset
+│       │   ├── visa.py                 # ViSADataset
+│       │   ├── btad.py                 # BTADDataset
 │       │   └── trainsforms.py          # get_image_transform, get_mask_transform
 │       └── models/
 │           ├── stfpm/

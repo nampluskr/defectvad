@@ -6,7 +6,7 @@ import sys
 from argparse import ArgumentParser
 from datetime import datetime
 
-from utils import set_environment, set_logging
+from utils import set_environment
 
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -18,7 +18,7 @@ if SOURCE_CIR not in sys.path:
     sys.path.insert(0, SOURCE_CIR)
 
 from defectvad.common.config import load_config, merge_configs, save_config
-from defectvad.common.utils import set_seed
+from defectvad.common.utils import set_seed, set_logging
 from defectvad.common.factory import create_dataset, create_dataloader
 from defectvad.common.factory import create_model, create_trainer
 from defectvad.common.evaluator import Evaluator
@@ -84,7 +84,7 @@ def train(config):
     # Create Datasets / Dataloaders / Model / Trainer
     # ===============================================================
 
-    vad = create_model(config["model"])
+    vad = create_model(config["model"]).info()
     trainer = create_trainer(vad, config["trainer"])
 
     train_dataset = create_dataset("train", config["dataset"])
